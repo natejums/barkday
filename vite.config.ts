@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite'
+import { configDefaults } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 
 // Deployed to GitHub Pages under /barkday/, but served from the root in dev.
@@ -13,5 +14,9 @@ export default defineConfig(({ command, isPreview }) => ({
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
     include: ['src/**/*.test.{ts,tsx}'],
+    // Double-underscore names are throwaway debugging probes (also gitignored).
+    // Excluded so a stray one can never join the suite as a test that passes
+    // without asserting anything.
+    exclude: [...configDefaults.exclude, '**/__*'],
   },
 }))

@@ -16,3 +16,7 @@ Thumbs.db
 
 *.log
 npm-debug.log*
+
+# Throwaway debugging probes. Prefixed with a double underscore by convention
+# so they are ignored here and excluded from the vitest suite in vite.config.ts.
+__*
