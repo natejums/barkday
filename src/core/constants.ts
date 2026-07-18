@@ -206,13 +206,22 @@ export const IDEAL_BCS_RANGE: readonly [number, number] = [4, 5]
 /** Being underweight carries its own risk, usually as a marker of illness. */
 export const UNDERWEIGHT_PENALTY_PER_POINT = 0.3
 
-/**
- * McMillan et al. (2024), Scientific Reports, n = 584,734: median lifespan by
- * skull shape is 11.2 years brachycephalic vs 12.8 mesocephalic.
+/*
+ * There is deliberately no brachycephaly constant here.
+ *
+ * McMillan et al. (2024), n = 584,734, puts brachycephalic median lifespan at
+ * 11.2 years against 12.8 for mesocephalic breeds, and an earlier version of
+ * this model applied that as a −1.6 year modifier. It was double-counting: the
+ * breed baselines are observed lifespans, and flat-faced breeds already sit
+ * ~1.9 years below the rest of the dataset because of the airway.
+ *
+ * It also flattened breeds that contradict the average — a Shih Tzu is
+ * brachycephalic and lives ~14 years, and the penalty docked it regardless.
+ * The breed's own baseline is the better signal, so brachycephaly reaches the
+ * user as health risks and care guidance rather than as arithmetic.
  *
  * https://www.nature.com/articles/s41598-023-50458-w
  */
-export const BRACHYCEPHALIC_PENALTY = -1.6
 
 /**
  * Mixed-breed advantage. Popular wisdom says mutts live much longer; the

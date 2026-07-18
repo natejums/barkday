@@ -25,9 +25,11 @@ The seven-year rule has no scientific basis. Nobody has ever found the study beh
 | Epigenetic clock | Wang et al. (2020), from DNA methylation — `16 × ln(age) + 31` | Built on 104 Labradors; no size term; **useless below 1 year**, so it declines to answer there |
 | "Times seven" | The folk rule | Wrong at every age, in different directions |
 
-**Aging is progress through a lifespan, not elapsed time.** That is the idea the headline model is built on, borrowed from the reasoning AAHA uses to define life stages. Work out how long *this* dog is expected to live, then read their position on the curve accordingly. A dog on track to outlive its breed average is genuinely younger than the calendar says.
+**Aging is progress through a lifespan, not elapsed time.** That is the idea the headline model is built on, borrowed from the reasoning AAHA uses to define life stages. Work out how long *this* dog is expected to live, compare that against a typical dog of the same size, and read their position on the curve accordingly. A dog on track to outlive its size cohort is genuinely younger than the calendar says.
 
-The payoff is that every input reaches the headline number through one principled channel. Body condition, dental care, brachycephaly and breed all move expected lifespan, and expected lifespan moves the age. Nothing is bolted on.
+The payoff is that every input reaches the headline number through one principled channel. Body condition, dental care and breed all move expected lifespan, and expected lifespan moves the age. Nothing is bolted on.
+
+It also means the model judges a breed by how long it actually lives rather than by how it looks. A Pug and a Shih Tzu are both flat-faced and both small, but the Shih Tzu lives about three years longer — so at six years old the Pug reads five human years older and the Shih Tzu reads slightly *younger* than the plain chart. A skull-shape penalty would have aged them alike and been wrong about both.
 
 **Modifiers don't add up — and the code refuses to pretend they do.**
 
@@ -37,7 +39,9 @@ So the modifiers saturate. Positive and negative adjustments are pooled separate
 
 ## What it models
 
-Beyond age and breed: body condition on the 9-point WSAVA scale, sex, neuter status, activity level, diet, dental care, veterinary care, living environment and household smoke exposure. Also brachycephaly, mixed ancestry, and the size/lifespan relationship — including the fact that it is **not monotonic**: small dogs slightly outlive toy dogs.
+Beyond age and breed: body condition on the 9-point WSAVA scale, sex, neuter status, activity level, diet, dental care, veterinary care, living environment and household smoke exposure. Also mixed ancestry, and the size/lifespan relationship — including the fact that it is **not monotonic**: small dogs slightly outlive toy dogs.
+
+What it deliberately does *not* model is brachycephaly, and the reason is instructive. Flat-faced breeds sit about 1.9 years below the rest of the dataset already, because their breed lifespan figures are observed lifespans and the airway is priced into them. Subtracting a published skull-shape effect on top would charge a Pug twice for one nose. It reaches the answer through the breed's own baseline instead, and shows up as care guidance rather than arithmetic.
 
 Each factor carries an evidence rating, and the app shows it. A finding from 584,734 dogs and a finding confounded by reverse causation should not look alike, and here they don't.
 
@@ -57,7 +61,7 @@ const result = calculateDogAge({
   activityLevel: 'sedentary',
 })
 
-result.humanAge.years             // 69.3
+result.humanAge.years             // 65.3
 result.lifeStage.stage            // 'senior'
 result.lifespan.expectedYears     // 10.5
 result.lifespan.rawDeltaYears     // -1.98  (what the factors sum to)

@@ -8,7 +8,12 @@ import { classifyLifeStage } from './lifeStage'
 import { estimateLifespan } from './lifespan'
 import { chartHumanAge, epigeneticHumanAge, naiveHumanAge, personalisedHumanAge } from './models'
 import { buildRecommendations } from './recommendations'
-import { chartBandFromSizeClass, chartBandFromWeight, sizeClassFromWeight } from './size'
+import {
+  chartBandFromSizeClass,
+  chartBandFromWeight,
+  lifeExpectancyForSizeClass,
+  sizeClassFromWeight,
+} from './size'
 import { describeYears } from './age'
 import { round } from './units'
 import type { DogAgeResult, DogProfile, ModelEstimate } from './types'
@@ -84,12 +89,21 @@ export function calculateDogAge(profile: DogProfile): DogAgeResult {
 
   const lifespan = estimateLifespan(profile, breed, sizeClass)
 
-  const headline = personalisedHumanAge(
-    ageYears,
-    chartBand,
-    lifespan.expectedYears,
-    lifespan.baselineYears,
-  )
+  /**
+   * The cohort the chart implicitly describes is "a typical dog of this size",
+   * not "a typical dog of this breed" — the chart is stratified by size and
+   * knows nothing about breeds. So the reference point has to be the size-class
+   * life expectancy.
+   *
+   * Using the breed's own baseline here (the obvious-looking choice) silently
+   * cancels breed out of the headline entirely: the ratio becomes 1.0 for every
+   * dog with no lifestyle modifiers, and a Pug reads exactly like a Beagle.
+   * Against the size cohort, a breed that dies young genuinely reads older,
+   * which is the whole point of asking for the breed.
+   */
+  const cohortLifespan = lifeExpectancyForSizeClass(sizeClass)
+
+  const headline = personalisedHumanAge(ageYears, chartBand, lifespan.expectedYears, cohortLifespan)
   if (headline.extrapolated) {
     warnings.push(
       'This dog is older than the published conversion charts go, so the human-age figure is extrapolated from the trend.',
@@ -99,8 +113,8 @@ export function calculateDogAge(profile: DogProfile): DogAgeResult {
   // The interval comes from the lifespan interval: a dog that turns out to be
   // on the short-lived end of its range is effectively older today.
   const [lifespanLow, lifespanHigh] = lifespan.rangeYears
-  const upperHumanAge = personalisedHumanAge(ageYears, chartBand, lifespanLow, lifespan.baselineYears)
-  const lowerHumanAge = personalisedHumanAge(ageYears, chartBand, lifespanHigh, lifespan.baselineYears)
+  const upperHumanAge = personalisedHumanAge(ageYears, chartBand, lifespanLow, cohortLifespan)
+  const lowerHumanAge = personalisedHumanAge(ageYears, chartBand, lifespanHigh, cohortLifespan)
 
   const rawChart = chartHumanAge(ageYears, chartBand)
   const epigenetic = epigeneticHumanAge(ageYears)

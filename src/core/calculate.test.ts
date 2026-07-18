@@ -104,10 +104,36 @@ describe('calculateDogAge — results', () => {
     expect(cared.remaining.years).toBeGreaterThan(neglected.remaining.years)
   })
 
-  it('ages a flat-faced breed faster than the plain chart says', () => {
+  it('ages a short-lived breed faster than the plain chart says', () => {
     const pug = calculateDogAge({ ageYears: 6, breedName: 'Pug' })
     const chart = pug.models.find((m) => m.id === 'chart')!
     expect(pug.humanAge.years).toBeGreaterThan(chart.humanYears!)
+  })
+
+  it('judges a breed by its lifespan, not by its face', () => {
+    // Pug and Shih Tzu are both brachycephalic and both in the small chart
+    // band, but the Shih Tzu lives ~14 years and the Pug ~11. A model keyed on
+    // skull shape would age them alike; one keyed on observed lifespan must not.
+    const pug = calculateDogAge({ ageYears: 6, breedName: 'Pug' })
+    const shihTzu = calculateDogAge({ ageYears: 6, breedName: 'Shih Tzu' })
+
+    expect(pug.chartBand).toBe(shihTzu.chartBand)
+    expect(pug.breed?.brachycephalic).toBe(true)
+    expect(shihTzu.breed?.brachycephalic).toBe(true)
+
+    expect(pug.humanAge.years).toBeGreaterThan(shihTzu.humanAge.years + 5)
+
+    // And the long-lived one is not dragged above the plain chart at all.
+    const chart = shihTzu.models.find((m) => m.id === 'chart')!
+    expect(shihTzu.humanAge.years).toBeLessThanOrEqual(chart.humanYears!)
+  })
+
+  it('reads a breed that matches its size cohort straight off the chart', () => {
+    // Great Dane baseline (9.5) equals the giant-class life expectancy (9.51),
+    // so there is nothing to adjust and the headline should be the chart value.
+    const dane = calculateDogAge({ ageYears: 6, breedName: 'Great Dane' })
+    const chart = dane.models.find((m) => m.id === 'chart')!
+    expect(dane.humanAge.years).toBeCloseTo(chart.humanYears!, 0)
   })
 
   it('never reports negative remaining time for a dog past its life expectancy', () => {
@@ -194,7 +220,7 @@ describe('the worked example in the README', () => {
     })
 
     expect(result.breed?.name).toBe('Labrador Retriever')
-    expect(result.humanAge.years).toBe(69.3)
+    expect(result.humanAge.years).toBe(65.3)
     expect(result.lifeStage.stage).toBe('senior')
     expect(result.lifespan.expectedYears).toBe(10.5)
     expect(result.lifespan.rawDeltaYears).toBe(-1.98)

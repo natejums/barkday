@@ -99,7 +99,6 @@ Baseline is the breed's population lifespan midpoint, or the size-class figure w
 
 | Factor | Adjustment | Confidence | Source |
 |---|---|---|---|
-| Brachycephalic | −1.6 yr | High | McMillan 2024: 11.2 vs 12.8 yr median, n = 584,734 |
 | Body condition, per point over 5 | −0.9 (toy/small), −0.88 (medium), −0.34 (large/giant) | **Low — derived** | Salt 2019, n = 50,787 |
 | Body condition, ideal (4–5) | +0.4 yr | Moderate | Purina Life Span Study |
 | Underweight, per point under 4 | −0.3 yr | Low | Usually a marker of illness, not a cause |
@@ -112,6 +111,16 @@ Baseline is the breed's population lifespan midpoint, or the size-class figure w
 | Diet | −0.6 (poor) → +0.7 (excellent) | Moderate | Purina; portion control is the lever |
 | Environment | +0.2 (indoor) → −0.4 (outdoor) | Low | Trauma, infection, temperature |
 | Household smoke | −0.3 yr | Low | Respiratory disease and some cancers |
+
+### On brachycephaly, which is deliberately absent
+
+McMillan et al. (2024) is a strong result — brachycephalic breeds have a median lifespan of 11.2 years against 12.8 for mesocephalic ones, across 584,734 dogs. An earlier version of this model applied it as a −1.6 year modifier. That was wrong, and the reason is the same one this whole section is about.
+
+The breed baselines are *observed* lifespans. Flat-faced breeds already average 11.0 years in this dataset against 12.9 for everything else — a 1.9-year gap that exists **because** of the airway. Applying McMillan on top charged those breeds twice for one nose.
+
+Worse, it applied the population average to breeds that contradict it. A Shih Tzu is brachycephalic and lives about 14 years; the penalty docked it anyway. Using the observed baseline instead lets a long-lived flat-faced breed read as long-lived, and a Pug read as short-lived, which is what the data actually says about each of them.
+
+Brachycephaly still reaches the user — as breed health risks and as care guidance about heat, harnesses and airway signs. It just does not get counted twice in the arithmetic.
 
 ### On the body condition figures
 

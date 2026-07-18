@@ -8,7 +8,6 @@
 
 import {
   BCS_PENALTY_PER_POINT,
-  BRACHYCEPHALIC_PENALTY,
   FEMALE_LIFESPAN_BONUS,
   IDEAL_BCS_RANGE,
   MIXED_BREED_BONUS,
@@ -107,19 +106,16 @@ function collectFactors(profile: DogProfile, breed: Breed | undefined, sizeClass
     if (factor) factors.push(factor)
   }
 
-  if (breed?.brachycephalic) {
-    factors.push({
-      id: 'brachycephalic',
-      label: 'Flat-faced breed',
-      deltaYears: BRACHYCEPHALIC_PENALTY,
-      confidence: 'high',
-      explanation:
-        `Brachycephalic breeds have a median lifespan of 11.2 years against 12.8 for ` +
-        `standard-muzzled dogs, across 584,734 UK dogs. The shortened skull crowds the ` +
-        `airway, and the resulting breathing difficulty drives heat intolerance, exercise ` +
-        `limits and anaesthetic risk.`,
-    })
-  }
+  // Deliberately no brachycephaly penalty here.
+  //
+  // It would double-count. The breed lifespan figures this baseline is drawn
+  // from are observed lifespans, and flat-faced breeds already sit ~1.9 years
+  // below the rest of the dataset precisely because of their skull shape.
+  // Subtracting McMillan's 1.6-year effect on top would charge a Pug twice for
+  // one airway. Brachycephaly instead reaches the result the honest way — the
+  // breed's own short baseline — and shows up as care guidance rather than
+  // arithmetic. This project spends a lot of words insisting that overlapping
+  // factors must not be summed; that has to apply to its own model too.
 
   if (breed?.group === 'Mixed & Designer' || !breed) {
     factors.push({

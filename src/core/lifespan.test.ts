@@ -59,13 +59,27 @@ describe('body condition', () => {
 })
 
 describe('breed-driven factors', () => {
-  it('applies the brachycephalic penalty', () => {
+  it('never charges a flat-faced breed twice for its skull', () => {
+    // The breed baseline is an OBSERVED lifespan, so it already carries the
+    // brachycephaly effect. Subtracting McMillan's 1.6 years on top would be
+    // double-counting — the exact error this project refuses to make elsewhere.
     const result = estimateLifespan({ ageYears: 5 }, pug, pug.sizeClass)
-    expect(result.factors.some((f) => f.id === 'brachycephalic')).toBe(true)
-    expect(result.expectedYears).toBeLessThan(result.baselineYears)
+    expect(result.factors.some((f) => f.id === 'brachycephalic')).toBe(false)
+    expect(result.expectedYears).toBe(result.baselineYears)
   })
 
-  it('does not apply it to a long-muzzled breed', () => {
+  it('does not penalise a long-lived breed for being flat-faced', () => {
+    // A Shih Tzu is brachycephalic and still lives ~14 years. A skull-shape
+    // penalty would dock it anyway; using its observed lifespan does not.
+    const shihTzu = findBreed('Shih Tzu')!
+    expect(shihTzu.brachycephalic).toBe(true)
+
+    const result = estimateLifespan({ ageYears: 5 }, shihTzu, shihTzu.sizeClass)
+    expect(result.expectedYears).toBe(result.baselineYears)
+    expect(result.expectedYears).toBeGreaterThan(13)
+  })
+
+  it('leaves a long-muzzled breed unadjusted too', () => {
     const result = estimateLifespan({ ageYears: 5 }, labrador, 'large')
     expect(result.factors.some((f) => f.id === 'brachycephalic')).toBe(false)
   })
