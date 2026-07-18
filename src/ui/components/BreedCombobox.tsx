@@ -20,9 +20,24 @@ export function BreedCombobox({ value, onChange }: Props) {
   const [open, setOpen] = useState(false)
   const [activeIndex, setActiveIndex] = useState(0)
   const containerRef = useRef<HTMLDivElement>(null)
+  const listRef = useRef<HTMLUListElement>(null)
   const listId = useId()
 
   const results = useMemo(() => searchBreeds(query, 40), [query])
+
+  const activeOption = open ? results[activeIndex] : undefined
+  const optionId = (index: number) => `${listId}-option-${index}`
+
+  // Keep the highlighted row visible: forty results don't fit, so arrowing past
+  // the fold would otherwise move a selection the user can't see.
+  useEffect(() => {
+    if (!open) return
+    const el = listRef.current?.children[activeIndex]
+    // jsdom has no layout engine and doesn't implement scrollIntoView.
+    if (el instanceof HTMLElement && typeof el.scrollIntoView === 'function') {
+      el.scrollIntoView({ block: 'nearest' })
+    }
+  }, [activeIndex, open])
 
   // Keep the input in step when the profile is changed from elsewhere.
   useEffect(() => {
@@ -90,6 +105,7 @@ export function BreedCombobox({ value, onChange }: Props) {
           aria-expanded={open}
           aria-controls={listId}
           aria-autocomplete="list"
+          {...(activeOption ? { 'aria-activedescendant': optionId(activeIndex) } : {})}
           placeholder="Start typing, or leave blank"
           value={query}
           onChange={(event) => {
@@ -103,9 +119,9 @@ export function BreedCombobox({ value, onChange }: Props) {
         />
 
         {open ? (
-          <ul className="combobox__list" id={listId} role="listbox">
+          <ul className="combobox__list" id={listId} role="listbox" ref={listRef} aria-label="Breed suggestions">
             {results.length === 0 ? (
-              <li className="combobox__empty">
+              <li className="combobox__empty" role="presentation">
                 No match. Leaving this blank still works — the estimate falls back to
                 population averages.
               </li>
@@ -113,6 +129,7 @@ export function BreedCombobox({ value, onChange }: Props) {
               results.map((breed, index) => (
                 <li
                   key={breed.name}
+                  id={optionId(index)}
                   role="option"
                   aria-selected={index === activeIndex}
                   className="combobox__option"
