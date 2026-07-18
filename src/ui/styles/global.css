@@ -17,7 +17,9 @@
   --surface-sunken: #f2f1ed;
   --text-primary: #0b0b0b;
   --text-secondary: #52514e;
-  --text-muted: #898781;
+  /* 5.1:1 on the card surface. The lighter grey this used to be measured
+     3.5:1, which reads fine to me and fails WCAG AA for anyone it doesn't. */
+  --text-muted: #6e6c67;
   --gridline: #e1e0d9;
   --baseline: #c3c2b7;
   --border: rgba(11, 11, 11, 0.1);
@@ -325,7 +327,19 @@ select {
   border-color: var(--baseline);
 }
 
-.input:focus {
+/*
+ * Keyboard focus gets a real outline; pointer focus gets the softer treatment.
+ * A bare `.input:focus { outline: none }` outranks the zero-specificity
+ * `:where(...)` rule above it, which quietly cancelled the focus ring for
+ * keyboard users — the one group it exists for.
+ */
+.input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  border-color: var(--accent);
+}
+
+.input:focus:not(:focus-visible) {
   outline: none;
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-wash);
@@ -385,12 +399,15 @@ select {
   position: relative;
 }
 
+/*
+ * Fixed, not absolute. The form column is a sticky scroll container, and an
+ * absolutely-positioned dropdown gets clipped by its `overflow-y: auto` — the
+ * list was being cut off a couple of rows in. Positioning against the viewport
+ * escapes the clip; the component supplies the coordinates.
+ */
 .combobox__list {
-  position: absolute;
+  position: fixed;
   z-index: 20;
-  top: calc(100% + 4px);
-  left: 0;
-  right: 0;
   max-height: 260px;
   overflow-y: auto;
   margin: 0;
@@ -452,8 +469,12 @@ select {
   padding-bottom: 8px;
 }
 
+/* A real <h2> so the primary result sits in the document outline, styled down
+   to read as the quiet lead-in it looks like. */
 .hero__label {
   font-size: 13px;
+  font-weight: 400;
+  letter-spacing: normal;
   color: var(--text-muted);
   margin-bottom: 10px;
 }
@@ -580,11 +601,18 @@ select {
   gap: 6px;
 }
 
+/*
+ * The hairline matters. The ordinal ramp is validated for step separation, but
+ * its lightest step sits close to the light surface and its darkest sits close
+ * to the dark one, so at 10px the shape can vanish at one end or the other.
+ * Outlining keeps the swatch legible without recompressing a validated ramp.
+ */
 .swatch {
   width: 10px;
   height: 10px;
   border-radius: 3px;
   flex-shrink: 0;
+  box-shadow: inset 0 0 0 1px var(--border);
 }
 
 /* ------------------------------------------------------------------- bars */

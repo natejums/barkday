@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { searchBreeds } from '../../core'
 import type { Breed } from '../../core'
 
@@ -21,7 +21,31 @@ export function BreedCombobox({ value, onChange }: Props) {
   const [activeIndex, setActiveIndex] = useState(0)
   const containerRef = useRef<HTMLDivElement>(null)
   const listRef = useRef<HTMLUListElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
   const listId = useId()
+
+  // The dropdown is position:fixed to escape the sticky column's overflow clip,
+  // which means it has to be told where the input is, and re-told whenever
+  // anything moves it.
+  const [anchor, setAnchor] = useState<{ left: number; top: number; width: number } | null>(null)
+
+  const measure = useCallback(() => {
+    const rect = inputRef.current?.getBoundingClientRect()
+    if (rect) setAnchor({ left: rect.left, top: rect.bottom + 4, width: rect.width })
+  }, [])
+
+  useLayoutEffect(() => {
+    if (!open) return
+    measure()
+    // Capture phase: the sticky column scrolls, not the window, and a scroll
+    // inside it doesn't bubble.
+    window.addEventListener('scroll', measure, true)
+    window.addEventListener('resize', measure)
+    return () => {
+      window.removeEventListener('scroll', measure, true)
+      window.removeEventListener('resize', measure)
+    }
+  }, [open, measure])
 
   const results = useMemo(() => searchBreeds(query, 40), [query])
 
@@ -97,6 +121,7 @@ export function BreedCombobox({ value, onChange }: Props) {
       </label>
       <div className="combobox" ref={containerRef}>
         <input
+          ref={inputRef}
           id={`${listId}-input`}
           className="input"
           type="text"
@@ -119,7 +144,16 @@ export function BreedCombobox({ value, onChange }: Props) {
         />
 
         {open ? (
-          <ul className="combobox__list" id={listId} role="listbox" ref={listRef} aria-label="Breed suggestions">
+          <ul
+            className="combobox__list"
+            id={listId}
+            role="listbox"
+            ref={listRef}
+            aria-label="Breed suggestions"
+            style={
+              anchor ? { left: anchor.left, top: anchor.top, width: anchor.width } : { visibility: 'hidden' }
+            }
+          >
             {results.length === 0 ? (
               <li className="combobox__empty" role="presentation">
                 No match. Leaving this blank still works — the estimate falls back to

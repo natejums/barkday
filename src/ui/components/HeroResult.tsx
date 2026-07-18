@@ -38,11 +38,26 @@ export function HeroResult({ result }: Props) {
 
   return (
     <section className="card" aria-labelledby="hero-heading">
-      <p className="hero__label" id="hero-heading">
-        {subject} {name ? 'is' : 'is'} about
+      {/*
+        The whole results column recomputes on every keystroke in a column the
+        user is not focused on. Without a live region a screen-reader user
+        changes an input and hears nothing at all — the answer silently moves
+        behind them. Announcing just the headline keeps the queue short; the
+        detail is still there to navigate to.
+      */}
+      <p className="visually-hidden" role="status">
+        {subject} is about {humanAge.years} human years old. Life stage: {lifeStage.label}.
       </p>
 
-      <div className="hero">
+      <h2 className="hero__label" id="hero-heading">
+        <span aria-hidden="true">{subject} is about</span>
+        <span className="visually-hidden">
+          {subject} is about {humanAge.years} human years old
+        </span>
+      </h2>
+
+      {/* Announced by the heading above, so hidden here to avoid double-reading. */}
+      <div className="hero" aria-hidden="true">
         <span className="hero__figure">{humanAge.years}</span>
         <span className="hero__unit">human years old</span>
       </div>

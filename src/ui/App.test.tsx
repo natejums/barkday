@@ -8,7 +8,17 @@ describe('App', () => {
 
     expect(screen.getByRole('heading', { name: /barkday/i })).toBeInTheDocument()
     // The default state is a real dog, so a headline number must be present.
-    expect(screen.getByText(/human years old/i)).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 2, name: /is about .* human years old/i })).toBeInTheDocument()
+  })
+
+  it('announces the headline to assistive tech through a live region', () => {
+    // The results column updates in a place the user is not focused on, so
+    // without this a screen-reader user gets no signal that the answer moved.
+    render(<App />)
+
+    const status = screen.getByRole('status')
+    expect(status).toHaveTextContent(/is about [\d.]+ human years old/i)
+    expect(status).toHaveTextContent(/life stage/i)
   })
 
   it('renders all four models with the headline one marked', () => {
