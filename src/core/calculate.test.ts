@@ -181,6 +181,31 @@ describe('calculateDogAge — results', () => {
   })
 })
 
+describe('the worked example in the README', () => {
+  // Pinned so the documented output can't quietly drift away from the code.
+  it('still produces the numbers the README quotes', () => {
+    const result = calculateDogAge({
+      name: 'Rufus',
+      ageYears: 9,
+      breedName: 'Lab',
+      bodyConditionScore: 7,
+      dentalCare: 'none',
+      activityLevel: 'sedentary',
+    })
+
+    expect(result.breed?.name).toBe('Labrador Retriever')
+    expect(result.humanAge.years).toBe(69.3)
+    expect(result.lifeStage.stage).toBe('senior')
+    expect(result.lifespan.expectedYears).toBe(10.5)
+    expect(result.lifespan.rawDeltaYears).toBe(-1.98)
+    expect(result.lifespan.appliedDeltaYears).toBe(-1.74)
+    expect(result.recommendations[0]).toMatchObject({
+      title: 'Get to an ideal body condition',
+      potentialYears: 0.9,
+    })
+  })
+})
+
 describe('calculateFromBirthDate', () => {
   it('derives age from a date of birth', () => {
     const result = calculateFromBirthDate(
