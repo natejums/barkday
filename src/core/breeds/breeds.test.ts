@@ -67,17 +67,21 @@ describe('breed dataset integrity', () => {
     const flat = BREEDS.filter((b) => b.brachycephalic)
     expect(flat.length).toBeGreaterThan(8)
     expect(flat.length).toBeLessThan(40)
-    // Spot-check the ones nobody could get wrong.
+    // Spot-check the ones nobody could get wrong. Resolving the breed is part
+    // of the assertion: `if (breed) expect(...)` would skip silently on a
+    // rename, which is the exact regression this guards against.
     for (const name of ['Pug', 'French Bulldog', 'Bulldog', 'Boxer']) {
       const breed = findBreed(name)
-      if (breed) expect(breed.brachycephalic, name).toBe(true)
+      expect(breed, name).toBeDefined()
+      expect(breed!.brachycephalic, name).toBe(true)
     }
   })
 
   it('does not flag obviously long-muzzled breeds as brachycephalic', () => {
     for (const name of ['Border Collie', 'Greyhound', 'Labrador Retriever', 'German Shepherd Dog']) {
       const breed = findBreed(name)
-      if (breed) expect(breed.brachycephalic ?? false, name).toBe(false)
+      expect(breed, name).toBeDefined()
+      expect(breed!.brachycephalic ?? false, name).toBe(false)
     }
   })
 })
@@ -152,8 +156,33 @@ describe('groups', () => {
     expect(BREED_GROUPS).toContain('Mixed & Designer')
   })
 
-  it('accounts for every breed exactly once across groups', () => {
+  it('sorts every breed into one of the known groups', () => {
+    // Summing breedsInGroup over BREED_GROUPS and comparing to BREEDS.length
+    // proves nothing: BREED_GROUPS is derived from BREEDS, so the two agree by
+    // construction for any dataset, correct or not. Pinning the expected set is
+    // what actually catches a regression — an earlier version of the data
+    // generator matched "sporting" inside "non-sporting" and silently collapsed
+    // two groups into one, which this would have failed on and that would not.
+    expect([...BREED_GROUPS].sort()).toEqual([
+      'Herding',
+      'Hound',
+      'Mixed & Designer',
+      'Non-Sporting',
+      'Sporting',
+      'Terrier',
+      'Toy',
+      'Working',
+    ])
+
+    // "Other" is the generator's fallback for an unrecognised group; none should survive.
+    expect(breedsInGroup('Other')).toEqual([])
+
     const total = BREED_GROUPS.reduce((sum, group) => sum + breedsInGroup(group).length, 0)
     expect(total).toBe(BREEDS.length)
+
+    // No group should be a near-empty rump, which is what a bad match produces.
+    for (const group of BREED_GROUPS) {
+      expect(breedsInGroup(group).length, group).toBeGreaterThan(15)
+    }
   })
 })

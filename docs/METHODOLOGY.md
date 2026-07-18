@@ -104,13 +104,24 @@ Baseline is the breed's population lifespan midpoint, or the size-class figure w
 | Underweight, per point under 4 | −0.3 yr | Low | Usually a marker of illness, not a cause |
 | Female | +0.13 yr | High | Montoya 2023: 12.76 vs 12.63 |
 | Neutered | +0.5 yr | Moderate | Population data; confounded by owner type |
-| Mixed ancestry | +0.3 yr | Low | Kraus 2023 heterozygosity |
 | Dental care | −0.8 (none) → +0.5 (professional) | Moderate | Glickman 2011, n = 164,706 |
 | Veterinary care | −1.0 (none) → +0.5 (twice-yearly) | Moderate | Preventive care and parasite compliance |
 | Activity | −0.5 (sedentary) → +0.4 (very active) | Low | Dog Aging Project; reverse causation likely |
 | Diet | −0.6 (poor) → +0.7 (excellent) | Moderate | Purina; portion control is the lever |
 | Environment | +0.2 (indoor) → −0.4 (outdoor) | Low | Trauma, infection, temperature |
 | Household smoke | −0.3 yr | Low | Respiratory disease and some cancers |
+
+### On mixed ancestry, which is also deliberately absent
+
+"Mutts are healthier" is the most confidently repeated claim in dog folklore, and the large datasets do not support it:
+
+- **Montoya (n = 13.3M):** mixed breeds 12.71 years, all dogs 12.69 — a tie.
+- **McMillan (n = 584,734):** crossbreeds 12.0 years, purebreds 12.7 — crossbreeds *shorter*-lived.
+- **Kraus et al. (2022):** breed-level heterozygosity does track lifespan, +0.084 yr per percentage point.
+
+Only the third points the way folklore does, and it is an ecological correlation *between breeds* rather than a claim about any individual crossbred dog.
+
+An earlier version of this model shipped a +0.3 year bonus here. That was fifteen times the effect its own cited source reported, and the opposite sign to a study cited a few lines away in the same file. Two large datasets pointing in opposite directions is a reason to model nothing, not a reason to average them into a number.
 
 ### On brachycephaly, which is deliberately absent
 
@@ -162,8 +173,8 @@ Size class is computed from the weight midpoint rather than stored independently
 4. Kealy R.D. et al. (2002). Effects of diet restriction on life span and age-related changes in dogs. *JAVMA*. https://pubmed.ncbi.nlm.nih.gov/11991408/
 5. Wang T. et al. (2020). Quantitative translation of dog-to-human aging by conserved remodeling of the DNA methylome. *Cell Systems*. https://www.cell.com/cell-systems/fulltext/S2405-4712(20)30203-9
 6. AAHA Canine Life Stage Guidelines. https://www.aaha.org/resources/life-stage-canine-2019/
-7. Glickman L.T. et al. (2011). Association between chronic azotemic kidney disease and the severity of periodontal disease in dogs. *Preventive Veterinary Medicine*. https://pubmed.ncbi.nlm.nih.gov/21131075/
-8. Kraus C. et al. (2023). The size–life span trade-off decomposed. *The American Naturalist*. https://www.journals.uchicago.edu/doi/10.1086/723662
+7. Glickman L.T. et al. (2011). Association between chronic azotemic kidney disease and the severity of periodontal disease in dogs. *Preventive Veterinary Medicine*. https://pubmed.ncbi.nlm.nih.gov/21345505/
+8. Kraus C., Snyder-Mackler N. & Promislow D.E.L. (2022). How size and genetic diversity shape lifespan across breeds of purebred dogs. *GeroScience*. https://doi.org/10.1007/s11357-022-00653-w
 9. Hart B.L. et al. (2020). Assisting decision-making on age of neutering for 35 breeds of dogs. *Frontiers in Veterinary Science*. https://www.frontiersin.org/articles/10.3389/fvets.2020.00388/full
 10. AVMA — Senior pet care. https://www.avma.org/resources-tools/pet-owners/petcare/senior-pets
 11. AKC dog age chart. https://www.akc.org/wp-content/uploads/2015/11/Dog_Age_Chart_Proof_01Blue.jpg

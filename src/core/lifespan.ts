@@ -10,7 +10,6 @@ import {
   BCS_PENALTY_PER_POINT,
   FEMALE_LIFESPAN_BONUS,
   IDEAL_BCS_RANGE,
-  MIXED_BREED_BONUS,
   MODIFIER_SATURATION_YEARS,
   NEUTER_BONUS,
   UNDERWEIGHT_PENALTY_PER_POINT,
@@ -98,7 +97,7 @@ function bodyConditionFactor(bcs: number, sizeClass: SizeClass): FactorSpec | nu
   }
 }
 
-function collectFactors(profile: DogProfile, breed: Breed | undefined, sizeClass: SizeClass) {
+function collectFactors(profile: DogProfile, sizeClass: SizeClass) {
   const factors: FactorSpec[] = []
 
   if (profile.bodyConditionScore !== undefined) {
@@ -117,18 +116,20 @@ function collectFactors(profile: DogProfile, breed: Breed | undefined, sizeClass
   // arithmetic. This project spends a lot of words insisting that overlapping
   // factors must not be summed; that has to apply to its own model too.
 
-  if (breed?.group === 'Mixed & Designer' || !breed) {
-    factors.push({
-      id: 'mixed-breed',
-      label: 'Mixed ancestry',
-      deltaYears: MIXED_BREED_BONUS,
-      confidence: 'low',
-      explanation:
-        `Genetic diversity tracks with lifespan at the breed level, so a small advantage is ` +
-        `defensible. It is much smaller than folklore suggests, though: the largest study on ` +
-        `record puts mixed breeds at 12.71 years against 12.69 for all dogs — statistically a tie.`,
-    })
-  }
+  // Deliberately no mixed-ancestry bonus either.
+  //
+  // "Mutts are healthier" is the most confidently repeated claim in dog
+  // folklore and the evidence does not support it. Montoya (n = 13.3M) puts
+  // mixed breeds at 12.71 years against 12.69 for all dogs — a tie. McMillan
+  // (n = 584,734) found crossbreeds actually shorter-lived than purebreds,
+  // 12.0 against 12.7. Only breed-level heterozygosity points the other way,
+  // and that is an ecological correlation between breeds, not a claim about
+  // any individual crossbred dog.
+  //
+  // An earlier version shipped +0.3 years here, which was fifteen times the
+  // effect its own cited source reported and the opposite sign to another
+  // study cited a few lines away. Two large datasets disagreeing is a reason
+  // to model nothing, not a reason to average them into a number.
 
   if (profile.sex === 'female') {
     factors.push({
@@ -281,7 +282,7 @@ export function estimateLifespan(
   sizeClass: SizeClass,
 ): LifespanEstimate {
   const baseline = baselineLifespan(breed, sizeClass)
-  const specs = collectFactors(profile, breed, sizeClass).filter((f) => f.deltaYears !== 0)
+  const specs = collectFactors(profile, sizeClass).filter((f) => f.deltaYears !== 0)
 
   let positives = 0
   let negatives = 0

@@ -84,9 +84,19 @@ describe('breed-driven factors', () => {
     expect(result.factors.some((f) => f.id === 'brachycephalic')).toBe(false)
   })
 
-  it('gives an unknown-breed dog the mixed-ancestry bonus', () => {
-    const result = estimateLifespan({ ageYears: 5 }, undefined, 'medium')
-    expect(result.factors.some((f) => f.id === 'mixed-breed')).toBe(true)
+  it('does not hand out a mixed-ancestry bonus that the evidence contradicts', () => {
+    // Montoya calls it a tie (12.71 vs 12.69) and McMillan has crossbreeds
+    // shorter-lived than purebreds (12.0 vs 12.7). Two large datasets pointing
+    // opposite ways is a reason to model nothing, not to split the difference.
+    const unknown = estimateLifespan({ ageYears: 5 }, undefined, 'medium')
+    expect(unknown.factors.some((f) => f.id === 'mixed-breed')).toBe(false)
+    expect(unknown.expectedYears).toBe(unknown.baselineYears)
+
+    const designer = findBreed('Labradoodle')!
+    expect(designer.group).toBe('Mixed & Designer')
+    const crossbred = estimateLifespan({ ageYears: 5 }, designer, designer.sizeClass)
+    expect(crossbred.factors.some((f) => f.id === 'mixed-breed')).toBe(false)
+    expect(crossbred.expectedYears).toBe(crossbred.baselineYears)
   })
 })
 

@@ -223,16 +223,19 @@ export const UNDERWEIGHT_PENALTY_PER_POINT = 0.3
  * https://www.nature.com/articles/s41598-023-50458-w
  */
 
-/**
- * Mixed-breed advantage. Popular wisdom says mutts live much longer; the
- * largest dataset says otherwise — Montoya found 12.71 years for mixed breeds
- * against 12.69 for all dogs, essentially a tie.
+/*
+ * There is deliberately no mixed-breed constant either.
  *
- * Breed-level heterozygosity does track lifespan (+0.084 yr per percentage
- * point, Kraus et al. 2023), so a small positive is defensible. Anything larger
- * is folklore.
+ * "Mutts are healthier" is the most confidently repeated claim in dog folklore
+ * and the large datasets do not support it. Montoya (n = 13.3M) puts mixed
+ * breeds at 12.71 years against 12.69 for all dogs — a tie. McMillan
+ * (n = 584,734) found crossbreeds shorter-lived than purebreds, 12.0 against
+ * 12.7. Breed-level heterozygosity does track lifespan (+0.084 yr per
+ * percentage point, Kraus et al. 2022), but that is a correlation between
+ * breeds, not a claim about an individual crossbred dog.
+ *
+ * https://doi.org/10.1007/s11357-022-00653-w
  */
-export const MIXED_BREED_BONUS = 0.3
 
 /** Montoya 2023: females 12.76 years, males 12.63. Small, consistent, real. */
 export const FEMALE_LIFESPAN_BONUS = 0.13

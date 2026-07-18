@@ -46,12 +46,34 @@ describe('epigeneticHumanAge', () => {
 })
 
 describe('chartHumanAge', () => {
-  it('reproduces the published chart at whole years', () => {
+  it('returns the table value at whole years', () => {
+    // Note this only proves the lookup plumbing: it reads HUMAN_AGE_CHART and
+    // asserts against HUMAN_AGE_CHART, so a wrong number in the table passes.
+    // The spot-checks below are what guard the data itself.
     for (const band of BANDS) {
       const series = HUMAN_AGE_CHART[band]
       series.forEach((expected, index) => {
         expect(chartHumanAge(index + 1, band).humanYears).toBeCloseTo(expected, 6)
       })
+    }
+  })
+
+  it('matches the published AKC and Metzger charts at hard-coded checkpoints', () => {
+    // Transcribed from the source charts, deliberately NOT read from the
+    // constant. A typo in HUMAN_AGE_CHART fails here and nowhere else.
+    const published: ReadonlyArray<readonly [ChartBand, number, number]> = [
+      ['small', 1, 15], ['small', 2, 24], ['small', 3, 28], ['small', 6, 40],
+      ['small', 10, 56], ['small', 16, 80], ['small', 25, 116],
+      ['medium', 1, 15], ['medium', 3, 28], ['medium', 6, 42], ['medium', 10, 60],
+      ['medium', 16, 87], ['medium', 25, 124],
+      ['large', 1, 15], ['large', 3, 28], ['large', 6, 45], ['large', 10, 66],
+      ['large', 16, 99], ['large', 22, 130],
+      ['giant', 1, 12], ['giant', 2, 22], ['giant', 3, 31], ['giant', 6, 49],
+      ['giant', 10, 79], ['giant', 16, 121], ['giant', 18, 139],
+    ]
+
+    for (const [band, dogAge, humanAge] of published) {
+      expect(chartHumanAge(dogAge, band).humanYears, `${band} @ ${dogAge}`).toBeCloseTo(humanAge, 6)
     }
   })
 
