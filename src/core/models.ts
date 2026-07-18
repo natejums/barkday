@@ -12,7 +12,7 @@ import {
   PUPPY_CURVE,
   WANG_COEFFICIENT,
   WANG_INTERCEPT,
-  WANG_SINGULARITY_YEARS,
+  WANG_VALID_RANGE,
 } from './constants'
 import { clamp, lerp } from './units'
 import type { ChartBand } from './types'
@@ -40,12 +40,15 @@ export function naiveHumanAge(dogYears: number): number {
 /**
  * Wang et al.'s DNA-methylation clock: 16 × ln(age) + 31.
  *
- * Clamped at zero because the curve crosses into negative human years at around
- * seven and a half weeks — a genuine artefact of fitting a logarithm to data
- * that never included newborns.
+ * Returns null below one year rather than a number, because the number would be
+ * a lie. The curve is a logarithm fitted to data that never included newborns:
+ * it crosses zero at about seven and a half weeks and goes negative below that,
+ * and even well clear of that singularity it misbehaves — at six months it
+ * returns 19.9, which would make a pre-adolescent puppy a twenty-year-old
+ * human. Clamping the output to zero would hide that rather than fix it.
  */
-export function epigeneticHumanAge(dogYears: number): number {
-  if (dogYears <= WANG_SINGULARITY_YEARS) return 0
+export function epigeneticHumanAge(dogYears: number): number | null {
+  if (dogYears < WANG_VALID_RANGE[0]) return null
   return WANG_COEFFICIENT * Math.log(dogYears) + WANG_INTERCEPT
 }
 

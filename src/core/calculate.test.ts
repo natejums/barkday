@@ -107,7 +107,7 @@ describe('calculateDogAge — results', () => {
   it('ages a flat-faced breed faster than the plain chart says', () => {
     const pug = calculateDogAge({ ageYears: 6, breedName: 'Pug' })
     const chart = pug.models.find((m) => m.id === 'chart')!
-    expect(pug.humanAge.years).toBeGreaterThan(chart.humanYears)
+    expect(pug.humanAge.years).toBeGreaterThan(chart.humanYears!)
   })
 
   it('never reports negative remaining time for a dog past its life expectancy', () => {

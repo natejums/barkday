@@ -103,6 +103,7 @@ export function calculateDogAge(profile: DogProfile): DogAgeResult {
   const lowerHumanAge = personalisedHumanAge(ageYears, chartBand, lifespanHigh, lifespan.baselineYears)
 
   const rawChart = chartHumanAge(ageYears, chartBand)
+  const epigenetic = epigeneticHumanAge(ageYears)
   const wangInRange = ageYears >= WANG_VALID_RANGE[0] && ageYears <= WANG_VALID_RANGE[1]
 
   const models: ModelEstimate[] = [
@@ -126,10 +127,13 @@ export function calculateDogAge(profile: DogProfile): DogAgeResult {
     {
       id: 'epigenetic',
       label: 'Epigenetic clock',
-      humanYears: round(epigeneticHumanAge(ageYears)),
-      description: wangInRange
-        ? 'Wang et al. (2020), from DNA methylation patterns shared between dogs and humans. The only genuinely molecular model here — but it was built on 104 Labradors, so it carries no size information at all.'
-        : 'Wang et al. (2020), from DNA methylation. Outside its validated 1–16 year range here, where the logarithm misbehaves badly — it puts a one-year-old dog at 31 human years.',
+      humanYears: epigenetic === null ? null : round(epigenetic),
+      description:
+        epigenetic === null
+          ? 'Wang et al. (2020), from DNA methylation. It has nothing to say about puppies: the formula is a logarithm fitted to data that never included newborns, and below a year it returns figures like 19.9 human years for a six-month-old. Reporting a number here would be worse than reporting none.'
+          : wangInRange
+            ? 'Wang et al. (2020), from DNA methylation patterns shared between dogs and humans. The only genuinely molecular model here — but it was built on 104 Labradors, so it carries no size information at all.'
+            : 'Wang et al. (2020), from DNA methylation. Past the 16-year upper edge of its training data here, where the curve flattens out and the estimate should be read loosely.',
       confidence: wangInRange ? 'moderate' : 'low',
     },
     {

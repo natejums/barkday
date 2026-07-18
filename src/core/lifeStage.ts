@@ -40,7 +40,7 @@ const STAGES: Readonly<Record<LifeStageId, StageDefinition>> = {
     careGuidance: [
       'Check-ups every 6–12 months',
       'Set a target weight from body condition score and hold it — appetite outlasts growth',
-      'Expect a 25–30% drop in calorie needs after neutering and adjust portions before weight creeps up',
+      'Expect calorie needs to drop by roughly 10–20% after neutering, and adjust portions before weight creeps up',
       'Consider a first professional dental cleaning, particularly for small breeds',
       'Annual heartworm and tick-borne disease testing',
     ],

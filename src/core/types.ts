@@ -75,7 +75,8 @@ export interface DogProfile {
 export interface ModelEstimate {
   id: string
   label: string
-  humanYears: number
+  /** Null when the model is outside the range it can honestly speak to. */
+  humanYears: number | null
   /** Why this model says what it says, and where it is weak. */
   description: string
   confidence: Confidence

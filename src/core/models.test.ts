@@ -25,18 +25,22 @@ describe('epigeneticHumanAge', () => {
     expect(epigeneticHumanAge(1)).toBeCloseTo(31, 6)
   })
 
-  it('clamps at the singularity instead of returning negatives', () => {
-    expect(epigeneticHumanAge(WANG_SINGULARITY_YEARS)).toBe(0)
-    expect(epigeneticHumanAge(0.05)).toBe(0)
-    expect(epigeneticHumanAge(0)).toBe(0)
+  it('declines to answer below a year rather than returning nonsense', () => {
+    // The curve gives 19.9 at six months and goes negative below ~7.5 weeks.
+    // Reporting null is the honest response; clamping to 0 would hide it.
+    expect(epigeneticHumanAge(0.5)).toBeNull()
+    expect(epigeneticHumanAge(WANG_SINGULARITY_YEARS)).toBeNull()
+    expect(epigeneticHumanAge(0)).toBeNull()
+    expect(epigeneticHumanAge(0.999)).toBeNull()
   })
 
-  it('is monotonically increasing above the singularity', () => {
+  it('is monotonically increasing across its supported range', () => {
     let previous = -Infinity
-    for (let age = 0.2; age <= 20; age += 0.1) {
+    for (let age = 1; age <= 20; age += 0.1) {
       const value = epigeneticHumanAge(age)
-      expect(value).toBeGreaterThan(previous)
-      previous = value
+      expect(value).not.toBeNull()
+      expect(value!).toBeGreaterThan(previous)
+      previous = value!
     }
   })
 })

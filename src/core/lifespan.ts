@@ -61,13 +61,15 @@ function bodyConditionFactor(bcs: number, sizeClass: SizeClass): FactorSpec | nu
       id: 'body-condition',
       label: 'Carrying extra weight',
       deltaYears: -pointsOver * perPoint,
-      confidence: 'moderate',
+      confidence: 'low',
       explanation:
         `${pointsOver} point${pointsOver === 1 ? '' : 's'} above ideal body condition. ` +
-        `In a study of 50,787 dogs, overweight dogs lost between 5 months and 2.5 years of ` +
-        `median lifespan depending on breed. Smaller dogs are penalised more heavily — ` +
-        `larger breeds tend to be claimed by cancer or heart disease before excess weight ` +
-        `collects its full cost.`,
+        `In a study of 50,787 dogs, overweight dogs lost between 5 months and 2 years ` +
+        `6 months of median lifespan depending on breed and sex. Smaller dogs are penalised ` +
+        `far more heavily — larger breeds tend to be claimed by cancer or heart disease ` +
+        `before excess weight collects its full cost. That study compared overweight against ` +
+        `ideal as two groups; scaling it to a per-point cost is our own extrapolation, so ` +
+        `treat the exact figure loosely and the direction as solid.`,
     }
   }
 

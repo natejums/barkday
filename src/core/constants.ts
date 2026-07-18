@@ -68,8 +68,11 @@ export const CHART_BAND_CUTOFFS_KG: readonly { band: ChartBand; maxKg: number }[
  * The bands run short where the source charts stop. The model extrapolates past
  * the end and flags it rather than pretending the data goes on forever.
  *
- * Sources:
- *   AKC     — https://www.akc.org/expert-advice/health/how-to-calculate-dog-years-to-human-years/
+ * Sources — note the AKC citation is the published chart itself, not the
+ * article that accompanies it. The article text gives only a single
+ * non-stratified rule (year one ≈ 15, year two ≈ +9, then ≈ +5 a year); the
+ * size-stratified numbers below come from the chart artwork:
+ *   AKC     — https://www.akc.org/wp-content/uploads/2015/11/Dog_Age_Chart_Proof_01Blue.jpg
  *   Metzger — https://www.idexx.com/files/preventive-brochures-age-chart.pdf
  */
 export const HUMAN_AGE_CHART: Readonly<Record<ChartBand, readonly number[]>> = {
@@ -166,17 +169,26 @@ export const GROWTH_MILESTONES: Readonly<
 // ---------------------------------------------------------------------------
 
 /**
- * Years of median lifespan lost per point of body condition score above ideal,
- * derived from Salt et al. (2019), n = 50,787 across 12 breeds.
+ * Years of median lifespan lost per point of body condition score above ideal.
  *
- * The counterintuitive part is real: the penalty for small dogs is roughly 2.5×
- * that for large dogs. The likely explanation is competing mortality rather than
- * small dogs being more sensitive to fat — large breeds tend to die of cancer
- * and cardiac disease before adiposity has time to collect its full bill.
+ * Read the provenance carefully, because it matters. Salt et al. (2019),
+ * n = 50,787 across 12 breeds, supports a *binary* claim only: dogs overweight
+ * in middle age had shorter median lifespans than matched normal-condition
+ * dogs, by 5 months to 2 years 6 months depending on breed and sex. The authors
+ * published no per-point figure and no continuous dose-response.
  *
- * Salt's study used a binary normal/overweight contrast on a 5-point scale;
- * mapping that onto per-point costs on the 9-point scale is a derivation, so
- * these carry moderate confidence at best.
+ * The per-point numbers below are this project's derivation — the observed
+ * whole-category difference divided by the roughly two 9-point BCS units that
+ * Salt's "overweight" category spans. A calculator needs a continuous response
+ * to a slider, but that is our engineering requirement, not the study's finding,
+ * which is why these ship as low confidence.
+ *
+ * The counterintuitive part is real and reproducible: the penalty for small
+ * dogs is roughly 2.5× that for large ones (Yorkshire Terrier 2.5 years,
+ * Chihuahua ~2.1, against German Shepherd ~5 months). The likely explanation is
+ * competing mortality rather than small dogs being more sensitive to fat —
+ * large breeds tend to die of cancer and cardiac disease before adiposity has
+ * time to collect its full bill.
  *
  * https://pmc.ncbi.nlm.nih.gov/articles/PMC6335446/
  */
