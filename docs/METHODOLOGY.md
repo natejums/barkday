@@ -29,9 +29,11 @@ Forcing either source onto the other's bands would mean fabricating numbers.
 
 ## 2. Human-age conversion
 
-### The chart (ages 1–25)
+### The chart (ages 1–25, depending on band)
 
-Ages 1–16 are the AKC chart verbatim; 17–25 continue with Metzger/IDEXX, which extends further. The two agree exactly from 6 to 16 apart from a year or so of rounding in the giant column, so the seam is invisible.
+Ages 1–16 are the AKC chart verbatim; from 17 the Metzger/IDEXX chart continues, which extends further. The two agree exactly from 6 to 16 apart from a year or so of rounding in the giant column, so the seam is invisible.
+
+The bands stop where their source charts stop, which is not the same age for each — small and medium run to 25, large to 22, giant to 18. Nothing is invented to square them off; past the end of a band the model extrapolates and says so.
 
 Below age 6 they diverge sharply, and the AKC values are the defensible ones — Metzger puts a one-year-old dog at 7 human years, which contradicts the basic fact that a yearling dog is sexually mature.
 
