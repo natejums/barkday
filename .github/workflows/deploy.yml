@@ -27,6 +27,10 @@ jobs:
           cache: npm
 
       - run: npm ci
+
+      # Deploy runs on the same push as CI but is a separate workflow, so
+      # without this a red test suite would still publish to the live site.
+      - run: npm test
       - run: npm run build
 
       - uses: actions/configure-pages@v5
