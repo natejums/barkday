@@ -2,8 +2,9 @@ import { useEffect, useMemo, useState } from 'react'
 import { calculateDogAge } from '../core'
 import { completeness, DEFAULT_STATE, toProfile, type FormPatch, type FormState } from './formState'
 import { DogForm } from './components/DogForm'
+import { DogReport } from './components/DogReport'
 import { FactorWaterfall } from './components/FactorWaterfall'
-import { BreedHealth, CareGuidance, Recommendations, Warnings } from './components/Guidance'
+import { BreedHealth, CareGuidance, HelpfulGear, Recommendations, Warnings } from './components/Guidance'
 import { HeroResult } from './components/HeroResult'
 import { ModelComparison } from './components/ModelComparison'
 
@@ -90,6 +91,8 @@ export function App() {
             <>
               <HeroResult result={result} />
 
+              <DogReport result={result} />
+
               {progress.filled < progress.total ? (
                 <div className="notice">
                   <span className="notice__icon" aria-hidden="true">
@@ -106,6 +109,7 @@ export function App() {
               <Warnings warnings={result.warnings} />
               <FactorWaterfall lifespan={result.lifespan} breedKnown={result.breed !== undefined} />
               <Recommendations result={result} detailsGiven={progress.filled} />
+              <HelpfulGear result={result} />
               <ModelComparison models={result.models} />
               <CareGuidance result={result} />
               {result.breedHealth ? <BreedHealth result={result} /> : null}
@@ -128,7 +132,8 @@ export function App() {
           The sources, the constants and their caveats are all in the repository.
         </p>
         <p>
-          <a href={REPO_URL}>Source on GitHub</a> · MIT licensed
+          <a href={REPO_URL}>Source on GitHub</a> ·{' '}
+          <a href={`${REPO_URL}/issues/new`}>Feedback or a correction?</a> · MIT licensed
         </p>
       </footer>
     </div>

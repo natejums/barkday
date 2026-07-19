@@ -264,6 +264,22 @@ export interface BreedHealthReport {
   screeningMatters: boolean
 }
 
+/**
+ * A generic category of gear that tends to help, tied to something the model
+ * actually found — a recommendation, a breed health flag, or the life stage.
+ *
+ * Deliberately brand-free and link-free. It names a *kind* of product and why it
+ * helps, and leaves the choosing (and any buying) to the owner. Naming brands or
+ * carrying affiliate links would trade the project's credibility for pennies.
+ */
+export interface ProductSuggestion {
+  id: string
+  title: string
+  detail: string
+  /** What surfaced it — a recommendation id, condition id, callout id or life stage. */
+  triggeredBy: string
+}
+
 export interface DogAgeResult {
   profile: DogProfile
   breed?: Breed
@@ -291,6 +307,8 @@ export interface DogAgeResult {
    * breed-specific, and a size band has none to report.
    */
   breedHealth?: BreedHealthReport
+  /** Generic, brand-free gear that tends to help, tied to this dog's results. */
+  productSuggestions: readonly ProductSuggestion[]
   /** Anything the caller should know about the quality of this answer. */
   warnings: readonly string[]
 }

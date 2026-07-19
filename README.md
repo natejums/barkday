@@ -76,11 +76,18 @@ result.lifespan.rawDeltaYears     // -1.98  (what the factors sum to)
 result.lifespan.appliedDeltaYears // -1.74  (what saturation allowed through)
 result.recommendations[0]         // { title: 'Get to an ideal body condition', potentialYears: 0.91, … }
 result.breedHealth?.priorityNow   // the concerns to watch for at this dog's age, most urgent first
+result.productSuggestions         // generic, brand-free gear tied to the findings above
+
+composeDogReport(result).paragraphs // a warm, personal note about this dog, composed offline
 ```
 
 Recommendations are not a lookup table. Each one re-runs the whole lifespan model with that single change applied and reports the difference — so the years quoted already account for saturation and for overlap with everything else the dog has going on.
 
 The health report is likewise personalised. `breedHealth.priorityNow` reflects the dog's life stage, `breedHealth.bySystem` groups every documented concern by body system, and `breedHealth.callouts` are the profile-specific cross-references (bloat feeding, flat-faced airway care, and so on). Pass `neuterAgeMonths` to make the neuter factor timing-aware for large breeds.
+
+`productSuggestions` turns those findings into concrete gear that tends to help — a slow-feeder for a bloat-prone breed, a ramp for a long-backed one, a kitchen scale for a dog that needs to lose weight. They are generic *categories* only: **no brands, no links, nothing sponsored.** Naming brands or carrying affiliate links would trade the project's credibility for pennies, and the whole point of this project is the credibility.
+
+`composeDogReport(result)` writes a short, warm note about the dog by name — where it is in life, how it's doing, and tender, specific things to do together at this stage. The point of a life-expectancy figure isn't to start a countdown; it's to help someone make the most of the time they have. The note is **composed in the browser from the structured result** — it is not written by a language model, so it never reaches the network, costs nothing, works offline, and cannot make anything up. Every warm sentence is anchored to a real finding.
 
 ## Development
 

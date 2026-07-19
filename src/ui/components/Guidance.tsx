@@ -61,6 +61,39 @@ export function Recommendations({
   )
 }
 
+export function HelpfulGear({ result }: { result: DogAgeResult }) {
+  const { productSuggestions } = result
+  if (productSuggestions.length === 0) return null
+
+  return (
+    <section className="card" aria-labelledby="gear-heading">
+      <header className="card__header">
+        <h2 className="card__title" id="gear-heading">
+          Gear that tends to help
+        </h2>
+        <p className="card__subtitle">
+          Generic categories tied to what's above — no brands, no links, nothing sponsored. Pick
+          what fits your dog and ignore the rest.
+        </p>
+      </header>
+
+      <div>
+        {productSuggestions.map((product) => (
+          <div className="rec" key={product.id}>
+            <div className="rec__gain" data-empty="true">
+              Gear
+            </div>
+            <div>
+              <p className="rec__title">{product.title}</p>
+              <p className="rec__detail">{product.detail}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  )
+}
+
 export function CareGuidance({ result }: { result: DogAgeResult }) {
   const { lifeStage } = result
 

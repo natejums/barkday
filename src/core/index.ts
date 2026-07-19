@@ -27,6 +27,9 @@ export {
 export { baselineLifespan, estimateLifespan } from './lifespan'
 export { classifyLifeStage, lifeStageDefinition, stageBoundaries } from './lifeStage'
 export { buildRecommendations } from './recommendations'
+export { buildProductSuggestions } from './products'
+export { composeDogReport } from './narrative'
+export type { DogReport } from './narrative'
 
 export {
   buildBreedHealth,
@@ -53,7 +56,16 @@ export {
   yearsBetween,
 } from './age'
 
-export { clamp, formatWeight, fromKilograms, KG_PER_LB, round, toKilograms } from './units'
+export {
+  clamp,
+  formatWeight,
+  fromKilograms,
+  KG_PER_LB,
+  round,
+  toKilograms,
+  WEIGHT_UNIT_LABEL,
+  weightUnitLabel,
+} from './units'
 export type { WeightUnit } from './units'
 
 export { ALL_DOGS_LIFE_EXPECTANCY, SIZE_BANDS } from './constants'
@@ -82,6 +94,7 @@ export type {
   ModelEstimate,
   NeuterStatus,
   OnsetStage,
+  ProductSuggestion,
   Recommendation,
   Sex,
   SizeClass,

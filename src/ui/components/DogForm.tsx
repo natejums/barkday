@@ -1,13 +1,13 @@
-import { fromKilograms } from '../../core'
+import { fromKilograms, weightUnitLabel } from '../../core'
 import type { Breed, WeightUnit } from '../../core'
 import { MAX_MIX_BREEDS, type FormPatch, type FormState } from '../formState'
 import { BreedCombobox } from './BreedCombobox'
 import { SegmentedControl } from './SegmentedControl'
 
-/** A breed's typical weight range in the unit the form is using, e.g. "55–80 lb". */
+/** A breed's typical weight range in the unit the form is using, e.g. "55–80 lbs". */
 function weightRangeLabel(range: readonly [number, number], unit: WeightUnit): string {
   const round = (v: number) => (unit === 'kg' ? Math.round(v * 10) / 10 : Math.round(v))
-  return `${round(fromKilograms(range[0], unit))}–${round(fromKilograms(range[1], unit))} ${unit}`
+  return `${round(fromKilograms(range[0], unit))}–${round(fromKilograms(range[1], unit))} ${weightUnitLabel(unit)}`
 }
 
 /** WSAVA 9-point body condition scale, in language an owner can actually apply. */
@@ -44,6 +44,55 @@ export function DogForm({ state, onChange, hintBreed }: Props) {
     if (state.mix.length <= 1) return
     onChange({ mix: state.mix.filter((_, i) => i !== index) })
   }
+
+  // Kept out of the advanced fold: body condition is the single biggest lever,
+  // and it's the one thing worth asking every owner up front.
+  const bodyCondition = (
+    <div className="form__section">
+      <p className="form__legend">Body condition</p>
+      <div className="field">
+        <span className="field__label" id="bcs-label">
+          Body condition score{' '}
+          <span className="field__help" style={{ display: 'inline' }}>(optional)</span>
+        </span>
+        <p className="field__help" style={{ marginTop: 0, marginBottom: 8 }}>
+          Feel along the ribs and look for a waist from above, then tap the number that fits — 1 is
+          skin and bone, 9 is very overweight. Most healthy dogs are a <strong>4 or 5</strong>.
+          It's the single biggest lever here.
+        </p>
+        <div className="segmented" role="group" aria-labelledby="bcs-label">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((score) => (
+            <button
+              key={score}
+              type="button"
+              className="segmented__option"
+              style={{ flex: '1 1 0', padding: '7px 0' }}
+              data-ideal={score === 4 || score === 5}
+              aria-pressed={state.bodyConditionScore === score}
+              aria-label={`Body condition ${score} of 9${score === 4 || score === 5 ? ', ideal' : ''}`}
+              onClick={() =>
+                onChange({
+                  bodyConditionScore: state.bodyConditionScore === score ? undefined : score,
+                })
+              }
+            >
+              {score}
+            </button>
+          ))}
+        </div>
+        <div className="scale-anchors" aria-hidden="true">
+          <span>1 · too thin</span>
+          <span>4–5 · ideal</span>
+          <span>9 · overweight</span>
+        </div>
+        <p className="field__help">
+          {state.bodyConditionScore
+            ? BCS_DESCRIPTIONS[state.bodyConditionScore]
+            : 'Tap a number to see what it means, or leave it blank to skip.'}
+        </p>
+      </div>
+    </div>
+  )
 
   return (
     <form className="card" onSubmit={(event) => event.preventDefault()}>
@@ -220,7 +269,7 @@ export function DogForm({ state, onChange, hintBreed }: Props) {
                 onChange({ weightUnit: event.target.value as FormState['weightUnit'] })
               }
             >
-              <option value="lb">lb</option>
+              <option value="lb">lbs</option>
               <option value="kg">kg</option>
             </select>
           </div>
@@ -237,7 +286,17 @@ export function DogForm({ state, onChange, hintBreed }: Props) {
         </div>
       </div>
 
-      <div className="form__section">
+      {bodyCondition}
+
+      <details className="form__advanced">
+        <summary className="form__advanced-summary">
+          Advanced options — sex, activity, diet, dental &amp; more
+        </summary>
+        <p className="form__advanced-note">
+          Everything here is optional, but body condition, dental and vet care move the number most.
+        </p>
+
+      <div className="form__section form__section--first">
         <p className="form__legend">Basics</p>
 
         <SegmentedControl
@@ -272,51 +331,6 @@ export function DogForm({ state, onChange, hintBreed }: Props) {
             onChange={(neuterTiming) => onChange({ neuterTiming })}
           />
         ) : null}
-      </div>
-
-      <div className="form__section">
-        <p className="form__legend">Body condition</p>
-        <div className="field">
-          <span className="field__label" id="bcs-label">
-            Body condition score{' '}
-            <span className="field__help" style={{ display: 'inline' }}>(optional)</span>
-          </span>
-          <p className="field__help" style={{ marginTop: 0, marginBottom: 8 }}>
-            Feel along the ribs and look for a waist from above, then tap the number that fits — 1 is
-            skin and bone, 9 is very overweight. Most healthy dogs are a <strong>4 or 5</strong>.
-            It's the single biggest lever here.
-          </p>
-          <div className="segmented" role="group" aria-labelledby="bcs-label">
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((score) => (
-              <button
-                key={score}
-                type="button"
-                className="segmented__option"
-                style={{ flex: '1 1 0', padding: '7px 0' }}
-                data-ideal={score === 4 || score === 5}
-                aria-pressed={state.bodyConditionScore === score}
-                aria-label={`Body condition ${score} of 9${score === 4 || score === 5 ? ', ideal' : ''}`}
-                onClick={() =>
-                  onChange({
-                    bodyConditionScore: state.bodyConditionScore === score ? undefined : score,
-                  })
-                }
-              >
-                {score}
-              </button>
-            ))}
-          </div>
-          <div className="scale-anchors" aria-hidden="true">
-            <span>1 · too thin</span>
-            <span>4–5 · ideal</span>
-            <span>9 · overweight</span>
-          </div>
-          <p className="field__help">
-            {state.bodyConditionScore
-              ? BCS_DESCRIPTIONS[state.bodyConditionScore]
-              : 'Tap a number to see what it means, or leave it blank to skip.'}
-          </p>
-        </div>
       </div>
 
       <div className="form__section">
@@ -392,6 +406,7 @@ export function DogForm({ state, onChange, hintBreed }: Props) {
           onChange={(secondhandSmoke) => onChange({ secondhandSmoke })}
         />
       </div>
+      </details>
     </form>
   )
 }
