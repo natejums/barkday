@@ -7,6 +7,7 @@ import { WANG_VALID_RANGE } from './constants'
 import { buildBreedHealth } from './health'
 import { classifyLifeStage } from './lifeStage'
 import { estimateLifespan } from './lifespan'
+import { buildProductSuggestions } from './products'
 import { chartHumanAge, epigeneticHumanAge, naiveHumanAge, personalisedHumanAge } from './models'
 import { buildRecommendations } from './recommendations'
 import {
@@ -203,6 +204,8 @@ export function calculateDogAge(profile: DogProfile): DogAgeResult {
   // report — the panel only appears when the breed was actually recognised.
   const breedHealth = breed ? buildBreedHealth(breed, lifeStage.stage, sizeClass, profile) : undefined
 
+  const productSuggestions = buildProductSuggestions(recommendations, breedHealth, lifeStage.stage)
+
   return {
     profile,
     ...(breed ? { breed } : {}),
@@ -223,6 +226,7 @@ export function calculateDogAge(profile: DogProfile): DogAgeResult {
     },
     recommendations,
     ...(breedHealth ? { breedHealth } : {}),
+    productSuggestions,
     warnings,
   }
 }

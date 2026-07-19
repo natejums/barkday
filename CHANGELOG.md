@@ -2,6 +2,35 @@
 
 All notable changes to Barkday are recorded here. Dates are ISO 8601.
 
+## [0.3.0] — 2026-07-19
+
+Polish and helpfulness, without adding weight to the form.
+
+### Added
+
+- **Helpful gear suggestions.** A new "Gear that tends to help" section suggests
+  generic product *categories* tied to what the model actually found for this dog
+  — a kitchen scale and weight-management food for an overweight dog, a Y-front
+  harness and cooling mat for a flat face, a slow-feeder for a bloat-prone breed,
+  an orthopaedic bed and ramp for a senior. It is deliberately **brand-free and
+  link-free, with nothing sponsored** — naming brands or carrying affiliate links
+  would trade the project's credibility for pennies. Health-driven items are
+  gated on the concern mattering at the dog's current age, so a young dog isn't
+  sold senior gear. New `buildProductSuggestions` export and
+  `DogAgeResult.productSuggestions`.
+- **A feedback link** in the footer, pointing at GitHub issues for corrections
+  and suggestions.
+
+### Changed
+
+- **The form leads with the essentials and folds the rest away.** Only name, age,
+  breed/mix, weight and body condition show by default; sex, neuter, activity,
+  diet, dental, vet care, environment and smoke now live behind an "Advanced
+  options" disclosure — so the default form asks five things, not twelve, without
+  losing any of the modelling for those who want it.
+- **Pounds are written "lbs"** everywhere they're shown (the internal unit value
+  is unchanged).
+
 ## [0.2.0] — 2026-07-19
 
 A "sharper" release: a more accurate age from a new criterion, and a far more
