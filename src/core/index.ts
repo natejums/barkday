@@ -10,6 +10,7 @@ export { calculateDogAge, calculateFromBirthDate, isSupportedAge, MAX_SUPPORTED_
 export {
   BREEDS,
   BREED_GROUPS,
+  blendBreeds,
   breedsInGroup,
   findBreed,
   popularBreeds,
@@ -26,6 +27,14 @@ export {
 export { baselineLifespan, estimateLifespan } from './lifespan'
 export { classifyLifeStage, lifeStageDefinition, stageBoundaries } from './lifeStage'
 export { buildRecommendations } from './recommendations'
+
+export {
+  buildBreedHealth,
+  matchCondition,
+  CONDITION_CATALOG,
+  BODY_SYSTEM_LABELS,
+  BODY_SYSTEM_ORDER,
+} from './health'
 
 export {
   chartBandFromSizeClass,
@@ -51,13 +60,20 @@ export { ALL_DOGS_LIFE_EXPECTANCY, SIZE_BANDS } from './constants'
 
 export type {
   ActivityLevel,
+  BodySystem,
   Breed,
+  BreedHealthReport,
   ChartBand,
+  ConditionInfo,
+  ConditionSeverity,
   Confidence,
   DentalCare,
   DietQuality,
   DogAgeResult,
   DogProfile,
+  HealthCallout,
+  HealthConcern,
+  HealthSystemGroup,
   LifeStageId,
   LifeStageInfo,
   LifespanEstimate,
@@ -65,6 +81,7 @@ export type {
   LivingEnvironment,
   ModelEstimate,
   NeuterStatus,
+  OnsetStage,
   Recommendation,
   Sex,
   SizeClass,

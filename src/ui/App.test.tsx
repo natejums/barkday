@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { App } from './App'
 
@@ -70,6 +70,81 @@ describe('App', () => {
     expect(screen.getByText(/population averages were assumed/i)).toBeInTheDocument()
     expect(screen.getByText(/baseline for a dog of this size/i)).toBeInTheDocument()
     expect(screen.queryByText(/for this breed and size/i)).not.toBeInTheDocument()
+  })
+
+  it('shows a breed-specific health panel once a breed is set', () => {
+    render(<App />)
+
+    // No breed on the landing view, so no health panel yet.
+    expect(screen.queryByRole('region', { name: /health to watch/i })).not.toBeInTheDocument()
+
+    fireEvent.change(screen.getByRole('combobox', { name: /breed/i }), {
+      target: { value: 'Great Dane' },
+    })
+
+    const panel = screen.getByRole('region', { name: /great dane — health to watch/i })
+    // A deep-chested breed gets the bloat feeding callout.
+    expect(within(panel).getByText(/guard against bloat/i)).toBeInTheDocument()
+    // And the full documented list is reachable.
+    expect(within(panel).getByText(/by body system/i)).toBeInTheDocument()
+  })
+
+  it('defaults the weight unit to pounds', () => {
+    render(<App />)
+    const unit = screen.getByRole('combobox', { name: /weight unit/i }) as HTMLSelectElement
+    expect(unit.value).toBe('lb')
+  })
+
+  it('spells out how to read the body condition score', () => {
+    render(<App />)
+    // The instruction and the ideal target are both present up front.
+    expect(screen.getByText(/feel along the ribs/i)).toBeInTheDocument()
+    expect(screen.getByText(/4–5 · ideal/i)).toBeInTheDocument()
+    const ideal = screen.getByRole('button', { name: /body condition 5 of 9, ideal/i })
+    expect(ideal).toBeInTheDocument()
+  })
+
+  it('turns the breed picker into a mix when the box is ticked', () => {
+    render(<App />)
+
+    // Single breed picker to start; no numbered breed rows.
+    expect(screen.getByRole('combobox', { name: /^breed$/i })).toBeInTheDocument()
+    expect(screen.queryByRole('combobox', { name: /breed 1/i })).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('checkbox', { name: /mixed breed/i }))
+
+    // Two component rows appear, each its own breed picker with a percentage.
+    expect(screen.getByRole('combobox', { name: /breed 1/i })).toBeInTheDocument()
+    expect(screen.getByRole('combobox', { name: /breed 2/i })).toBeInTheDocument()
+    expect(screen.getByRole('spinbutton', { name: /breed 1 percentage/i })).toBeInTheDocument()
+  })
+
+  it('shows a blended health panel for a known mix', () => {
+    render(<App />)
+    fireEvent.click(screen.getByRole('checkbox', { name: /mixed breed/i }))
+
+    fireEvent.change(screen.getByRole('combobox', { name: /breed 1/i }), {
+      target: { value: 'Great Dane' },
+    })
+    fireEvent.change(screen.getByRole('combobox', { name: /breed 2/i }), {
+      target: { value: 'Poodle (Standard)' },
+    })
+
+    // The health panel names the blend and still surfaces the Dane's bloat callout.
+    const panel = screen.getByRole('region', { name: /health to watch/i })
+    expect(within(panel).getByText(/great dane/i)).toBeInTheDocument()
+    expect(within(panel).getByText(/guard against bloat/i)).toBeInTheDocument()
+  })
+
+  it('reveals the neuter-timing question only after a dog is marked neutered', () => {
+    render(<App />)
+
+    expect(screen.queryByRole('group', { name: /neutered before a year/i })).not.toBeInTheDocument()
+
+    const neuterGroup = screen.getByRole('group', { name: /neutered or spayed/i })
+    fireEvent.click(within(neuterGroup).getByRole('button', { name: /^yes$/i }))
+
+    expect(screen.getByRole('group', { name: /neutered before a year/i })).toBeInTheDocument()
   })
 
   it('credits McMillan for what it rules out rather than for a modifier', () => {

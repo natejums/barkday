@@ -2,8 +2,9 @@
  * The public entry point: one dog in, a full picture out.
  */
 
-import { findBreed } from './breeds'
+import { blendBreeds, findBreed } from './breeds'
 import { WANG_VALID_RANGE } from './constants'
+import { buildBreedHealth } from './health'
 import { classifyLifeStage } from './lifeStage'
 import { estimateLifespan } from './lifespan'
 import { chartHumanAge, epigeneticHumanAge, naiveHumanAge, personalisedHumanAge } from './models'
@@ -42,8 +43,20 @@ export function calculateDogAge(profile: DogProfile): DogAgeResult {
     ageYears = MAX_SUPPORTED_AGE
   }
 
-  const breed = profile.breedName ? findBreed(profile.breedName) : undefined
-  if (profile.breedName && !breed) {
+  // A known mix takes precedence: its components are blended into one synthetic
+  // breed. A single recognised breed name resolves the ordinary way.
+  const hasComposition = profile.breedComposition !== undefined && profile.breedComposition.length > 0
+  const breed = hasComposition
+    ? blendBreeds(profile.breedComposition!)
+    : profile.breedName
+      ? findBreed(profile.breedName)
+      : undefined
+
+  if (hasComposition && !breed) {
+    warnings.push(
+      'None of the breeds in the mix were recognised, so size-based population figures were used instead.',
+    )
+  } else if (!hasComposition && profile.breedName && !breed) {
     warnings.push(
       `"${profile.breedName}" isn't in the breed list, so size-based population figures were used instead.`,
     )
@@ -186,6 +199,10 @@ export function calculateDogAge(profile: DogProfile): DogAgeResult {
 
   const recommendations = buildRecommendations(profile, breed, sizeClass, lifeStage.stage)
 
+  // Health predispositions are breed-specific, so a size band has none to
+  // report — the panel only appears when the breed was actually recognised.
+  const breedHealth = breed ? buildBreedHealth(breed, lifeStage.stage, sizeClass, profile) : undefined
+
   return {
     profile,
     ...(breed ? { breed } : {}),
@@ -205,6 +222,7 @@ export function calculateDogAge(profile: DogProfile): DogAgeResult {
       label: describeYears(remainingYears).label,
     },
     recommendations,
+    ...(breedHealth ? { breedHealth } : {}),
     warnings,
   }
 }
