@@ -179,8 +179,8 @@ export function BreedHealth({ result }: { result: DogAgeResult }) {
         <div className="health__block">
           <p className="health__block-title">Most relevant around this age</p>
           <div className="health__list">
-            {priorityNow.map((concern) => (
-              <ConcernRow concern={concern} key={`p-${concern.label}`} />
+            {priorityNow.map((concern, i) => (
+              <ConcernRow concern={concern} key={`p-${i}-${concern.label}`} />
             ))}
           </div>
         </div>
@@ -199,8 +199,8 @@ export function BreedHealth({ result }: { result: DogAgeResult }) {
           <div className="health__block" key={group.system}>
             <p className="health__block-title">{group.label}</p>
             <div className="health__list">
-              {group.concerns.map((concern) => (
-                <ConcernRow concern={concern} key={`${group.system}-${concern.label}`} />
+              {group.concerns.map((concern, i) => (
+                <ConcernRow concern={concern} key={`${group.system}-${i}-${concern.label}`} />
               ))}
             </div>
           </div>

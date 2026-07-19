@@ -89,6 +89,33 @@ describe('matchCondition', () => {
     expect(matchCondition('')).toBeUndefined()
   })
 
+  it('lets a named stone cause beat the generic "bladder stones" it co-occurs with', () => {
+    // Every breed that names cystinuria or urate defect pairs it with "bladder
+    // stones"; the generic umbrella must not swallow the specific aetiology, or
+    // the Dalmatian gets generic advice instead of its urate DNA-test guidance.
+    expect(matchCondition('cystinuria and bladder stones (mainly males)')?.id).toBe('cystinuria')
+    expect(matchCondition('urate bladder stones from a uric acid defect')?.id).toBe('urate-stones')
+    // …but a bare mention still resolves to the umbrella.
+    expect(matchCondition('bladder stones and urinary blockages')?.id).toBe('bladder-stones')
+  })
+
+  it('matches on word boundaries, so "thyroid" does not fire inside "parathyroid"', () => {
+    // Hyperparathyroidism is a calcium/parathyroid disorder with no entry here.
+    // A bare substring match handed it hypothyroidism's reassuring advice.
+    expect(matchCondition('primary hyperparathyroidism (high blood calcium)')).toBeUndefined()
+    // The real thing still resolves, via its own aliases.
+    expect(matchCondition('underactive thyroid (hypothyroidism)')?.id).toBe('hypothyroidism')
+    expect(matchCondition('thyroid problems')?.id).toBe('hypothyroidism')
+  })
+
+  it('does not read epileptoid cramping syndrome as epilepsy', () => {
+    // CECS ("Spike's disease") is a paroxysmal dyskinesia, clinically distinct
+    // from epilepsy; there is no entry for it, so it should stay unmatched.
+    expect(matchCondition("canine epileptoid cramping syndrome (spike's disease)")).toBeUndefined()
+    expect(matchCondition('epilepsy')?.id).toBe('epilepsy')
+    expect(matchCondition('idiopathic epilepsy and seizures')?.id).toBe('epilepsy')
+  })
+
   it('matches a large majority of the real breed risk corpus', () => {
     let total = 0
     let matched = 0

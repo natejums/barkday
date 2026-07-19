@@ -272,7 +272,9 @@ export const CONDITION_CATALOG: readonly ConditionInfo[] = [
   {
     id: 'epilepsy',
     name: 'Idiopathic epilepsy',
-    aliases: ['epilepsy', 'epilep', 'seizure', 'seizures'],
+    // Not a bare "epilep-" prefix: it also matches "epileptoid cramping
+    // syndrome", a distinct dyskinesia this entry would misdescribe.
+    aliases: ['epilepsy', 'epileptic', 'seizure', 'seizures'],
     system: 'neurological',
     severity: 'serious',
     typicalOnset: 'young-adult',
@@ -699,6 +701,10 @@ export const CONDITION_CATALOG: readonly ConditionInfo[] = [
     system: 'urinary',
     severity: 'serious',
     typicalOnset: 'mature-adult',
+    // "Bladder stones" is the umbrella; cystinuria and urate stones name the
+    // actual cause. Marking this generic lets those win when a phrase mentions
+    // both — otherwise the longer "bladder stone" alias buries them.
+    generic: true,
     signs:
       'Straining to wee, blood in the urine, frequent small squats and accidents. A male dog who cannot pass urine at all is an emergency.',
     action:
