@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { calculateDogAge } from '../core'
 import { completeness, DEFAULT_STATE, toProfile, type FormPatch, type FormState } from './formState'
 import { DogForm } from './components/DogForm'
+import { DogReport } from './components/DogReport'
 import { FactorWaterfall } from './components/FactorWaterfall'
 import { BreedHealth, CareGuidance, HelpfulGear, Recommendations, Warnings } from './components/Guidance'
 import { HeroResult } from './components/HeroResult'
@@ -89,6 +90,8 @@ export function App() {
           ) : (
             <>
               <HeroResult result={result} />
+
+              <DogReport result={result} />
 
               {progress.filled < progress.total ? (
                 <div className="notice">

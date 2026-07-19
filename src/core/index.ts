@@ -28,6 +28,8 @@ export { baselineLifespan, estimateLifespan } from './lifespan'
 export { classifyLifeStage, lifeStageDefinition, stageBoundaries } from './lifeStage'
 export { buildRecommendations } from './recommendations'
 export { buildProductSuggestions } from './products'
+export { composeDogReport } from './narrative'
+export type { DogReport } from './narrative'
 
 export {
   buildBreedHealth,
