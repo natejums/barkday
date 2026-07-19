@@ -11,6 +11,7 @@ import { buildRecommendations } from './recommendations'
 import {
   chartBandFromSizeClass,
   chartBandFromWeight,
+  isUsableWeight,
   lifeExpectancyForSizeClass,
   sizeClassFromWeight,
 } from './size'
@@ -49,6 +50,23 @@ export function calculateDogAge(profile: DogProfile): DogAgeResult {
   }
 
   /**
+   * A weight that isn't a positive finite number is treated as no weight at all.
+   *
+   * The app guards its own input, but this function is exported as a standalone
+   * engine, and `toKilograms(parseFloat(''), 'lb')` is NaN. Left unchecked that
+   * silently selected the most extreme chart band rather than failing or falling
+   * back, so a typo read as a giant dog. Rejecting it out loud is the only
+   * honest option: ageYears already throws on non-finite input, and weight had
+   * no equivalent check.
+   */
+  const weightKg = isUsableWeight(profile.weightKg) ? profile.weightKg : undefined
+  if (profile.weightKg !== undefined && weightKg === undefined) {
+    warnings.push(
+      'The weight given was not a usable positive number, so it has been ignored and the estimate falls back to breed or population averages.',
+    )
+  }
+
+  /**
    * Breed standard beats measured weight for sizing, when a breed is known.
    *
    * Size class is meant to capture skeletal frame, and an overweight Labrador
@@ -58,11 +76,11 @@ export function calculateDogAge(profile: DogProfile): DogAgeResult {
    */
   const sizeClass = breed
     ? breed.sizeClass
-    : profile.weightKg !== undefined
-      ? sizeClassFromWeight(profile.weightKg)
+    : weightKg !== undefined
+      ? sizeClassFromWeight(weightKg)
       : 'medium'
 
-  if (!breed && profile.weightKg === undefined) {
+  if (!breed && weightKg === undefined) {
     warnings.push(
       'With no breed or weight given, medium-dog population averages were assumed. Adding either will sharpen the estimate considerably.',
     )
@@ -70,19 +88,19 @@ export function calculateDogAge(profile: DogProfile): DogAgeResult {
 
   const chartBand = breed
     ? chartBandFromSizeClass(breed.sizeClass)
-    : profile.weightKg !== undefined
-      ? chartBandFromWeight(profile.weightKg)
+    : weightKg !== undefined
+      ? chartBandFromWeight(weightKg)
       : 'medium'
 
-  if (breed && profile.weightKg !== undefined) {
+  if (breed && weightKg !== undefined) {
     const [low, high] = breed.weightKg
-    if (profile.weightKg > high * 1.25) {
+    if (weightKg > high * 1.25) {
       warnings.push(
-        `At ${round(profile.weightKg, 1)} kg this dog is well above the typical range for a ${breed.name} (${low}–${high} kg). Worth confirming the body condition score.`,
+        `At ${round(weightKg, 1)} kg this dog is well above the typical range for a ${breed.name} (${low}–${high} kg). Worth confirming the body condition score.`,
       )
-    } else if (profile.weightKg < low * 0.75) {
+    } else if (weightKg < low * 0.75) {
       warnings.push(
-        `At ${round(profile.weightKg, 1)} kg this dog is well below the typical range for a ${breed.name} (${low}–${high} kg).`,
+        `At ${round(weightKg, 1)} kg this dog is well below the typical range for a ${breed.name} (${low}–${high} kg).`,
       )
     }
   }

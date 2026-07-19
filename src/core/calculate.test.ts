@@ -63,6 +63,42 @@ describe('calculateDogAge — sizing', () => {
   it('assumes a medium dog when given nothing', () => {
     expect(calculateDogAge({ ageYears: 5 }).sizeClass).toBe('medium')
   })
+
+  it('ignores an unusable weight instead of reading it as a giant dog', () => {
+    // Every comparison against NaN is false, so the two size taxonomies used to
+    // fall out of their lookups in opposite directions — 'medium' from one and
+    // 'giant' from the other — and a dog with a typo'd weight aged nine human
+    // years overnight with nothing said about it.
+    const sane = calculateDogAge({ ageYears: 5 })
+
+    for (const weightKg of [NaN, Infinity, -Infinity, -5, 0]) {
+      const result = calculateDogAge({ ageYears: 5, weightKg })
+
+      expect(result.sizeClass, `weightKg = ${weightKg}`).toBe('medium')
+      expect(result.chartBand, `weightKg = ${weightKg}`).toBe('medium')
+      expect(result.humanAge.years, `weightKg = ${weightKg}`).toBe(sane.humanAge.years)
+      expect(
+        result.warnings.some((w) => w.includes('not a usable positive number')),
+        `weightKg = ${weightKg} should be reported, not silently dropped`,
+      ).toBe(true)
+    }
+  })
+
+  it('does not complain about a weight that was never given', () => {
+    expect(calculateDogAge({ ageYears: 5 }).warnings.join(' ')).not.toContain(
+      'not a usable positive number',
+    )
+  })
+
+  it('does not measure an unusable weight against the breed standard', () => {
+    const result = calculateDogAge({ ageYears: 5, breedName: 'Chihuahua', weightKg: NaN })
+
+    // The over/underweight checks compare against NaN too, so they used to be
+    // skipped in silence rather than reporting that the weight was unusable.
+    expect(result.warnings.join(' ')).not.toContain('typical range')
+    expect(result.warnings.join(' ')).toContain('not a usable positive number')
+    expect(result.sizeClass).toBe('toy')
+  })
 })
 
 describe('calculateDogAge — results', () => {

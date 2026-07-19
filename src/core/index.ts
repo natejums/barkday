@@ -30,6 +30,7 @@ export { buildRecommendations } from './recommendations'
 export {
   chartBandFromSizeClass,
   chartBandFromWeight,
+  isUsableWeight,
   lifeExpectancyForSizeClass,
   sizeClassFromWeight,
   sizeClassLabel,
