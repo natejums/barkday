@@ -4,6 +4,7 @@
 
 import { findBreed } from './breeds'
 import { WANG_VALID_RANGE } from './constants'
+import { buildBreedHealth } from './health'
 import { classifyLifeStage } from './lifeStage'
 import { estimateLifespan } from './lifespan'
 import { chartHumanAge, epigeneticHumanAge, naiveHumanAge, personalisedHumanAge } from './models'
@@ -186,6 +187,10 @@ export function calculateDogAge(profile: DogProfile): DogAgeResult {
 
   const recommendations = buildRecommendations(profile, breed, sizeClass, lifeStage.stage)
 
+  // Health predispositions are breed-specific, so a size band has none to
+  // report — the panel only appears when the breed was actually recognised.
+  const breedHealth = breed ? buildBreedHealth(breed, lifeStage.stage, sizeClass, profile) : undefined
+
   return {
     profile,
     ...(breed ? { breed } : {}),
@@ -205,6 +210,7 @@ export function calculateDogAge(profile: DogProfile): DogAgeResult {
       label: describeYears(remainingYears).label,
     },
     recommendations,
+    ...(breedHealth ? { breedHealth } : {}),
     warnings,
   }
 }

@@ -164,6 +164,19 @@ export function DogForm({ state, onChange }: Props) {
           value={state.neuterStatus}
           onChange={(neuterStatus) => onChange({ neuterStatus })}
         />
+
+        {state.neuterStatus === 'neutered' ? (
+          <SegmentedControl
+            legend="Neutered before a year old?"
+            help="Only matters for large and giant breeds — Hart et al. (2020) link early neutering to more joint disorders in bigger dogs. Timing past a year, or in smaller dogs, doesn't change the estimate."
+            options={[
+              { value: 'early', label: 'Under 1 year' },
+              { value: 'adult', label: '1 year or older' },
+            ]}
+            value={state.neuterTiming}
+            onChange={(neuterTiming) => onChange({ neuterTiming })}
+          />
+        ) : null}
       </div>
 
       <div className="form__section">
