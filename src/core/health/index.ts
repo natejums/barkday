@@ -44,16 +44,37 @@ function normalise(value: string): string {
 }
 
 /**
+ * True when `needle` occurs in `hay` starting at a word boundary.
+ *
+ * A bare `hay.includes(needle)` matched inside longer words: "thyroid" fired on
+ * "para**thyroid**ism", handing a hyperparathyroid dog hypothyroidism's advice.
+ * Requiring a boundary only at the *start* blocks that while preserving the
+ * prefix aliases the catalogue leans on — "epilep" still matches "epilepsy",
+ * "allerg" still matches "allergic" — because those already begin a word.
+ */
+function boundaryIncludes(hay: string, needle: string): boolean {
+  let from = 0
+  for (;;) {
+    const i = hay.indexOf(needle, from)
+    if (i < 0) return false
+    const before = i === 0 ? '' : hay.charAt(i - 1)
+    if (before === '' || !/[a-z0-9]/.test(before)) return true
+    from = i + 1
+  }
+}
+
+/**
  * Link one free-text risk to a catalogue entry, or nothing.
  *
  * Within a tier the longest matching alias wins, so a specific condition beats a
  * general one sharing a word — "hip dysplasia" over a hypothetical bare "hip",
  * "dilated cardiomyopathy" over "heat intolerance" in a phrase mentioning both.
  *
- * Catch-all entries ("heart disease", "inherited eye conditions") sit in a
- * second tier that is only consulted when nothing specific matched. Without
- * that, a long vague alias could out-measure a short precise one — "eye
- * conditions" beating "entropion" — and bury the useful answer.
+ * Catch-all entries ("heart disease", "bladder stones", "inherited eye
+ * conditions") sit in a second tier that is only consulted when nothing specific
+ * matched. Without it, a long vague alias could out-measure a short precise one —
+ * "eye conditions" beating "entropion", or "bladder stone" beating the shorter
+ * "cystinuria" that names the actual cause — and bury the useful answer.
  */
 export function matchCondition(risk: string): ConditionInfo | undefined {
   const hay = normalise(risk)
@@ -66,7 +87,7 @@ export function matchCondition(risk: string): ConditionInfo | undefined {
   for (const condition of CONDITION_CATALOG) {
     for (const alias of condition.aliases) {
       const needle = normalise(alias)
-      if (!hay.includes(needle)) continue
+      if (!boundaryIncludes(hay, needle)) continue
       if (condition.generic) {
         if (needle.length > genericLen) {
           generic = condition
