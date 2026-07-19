@@ -51,4 +51,34 @@ describe('App', () => {
     render(<App />)
     expect(screen.getByText(/not veterinary advice/i)).toBeInTheDocument()
   })
+
+  it('does not congratulate a visitor on care they never described', () => {
+    // The landing view has nothing entered but age, so the recommendations list
+    // is empty because nothing was assessed — not because everything is fine.
+    render(<App />)
+
+    expect(screen.getByText(/0 of 10 details filled in/i)).toBeInTheDocument()
+    expect(screen.queryByText(/doing well on every factor/i)).not.toBeInTheDocument()
+    expect(screen.getByText(/nothing to go on yet/i)).toBeInTheDocument()
+  })
+
+  it('does not claim a breed baseline when no breed is known', () => {
+    // The warning directly above this card says medium-dog population averages
+    // were assumed; the baseline copy must not contradict it.
+    render(<App />)
+
+    expect(screen.getByText(/population averages were assumed/i)).toBeInTheDocument()
+    expect(screen.getByText(/baseline for a dog of this size/i)).toBeInTheDocument()
+    expect(screen.queryByText(/for this breed and size/i)).not.toBeInTheDocument()
+  })
+
+  it('credits McMillan for what it rules out rather than for a modifier', () => {
+    // The engine deliberately applies no skull-shape penalty, so the footer
+    // must not tell visitors it does.
+    render(<App />)
+
+    const footer = screen.getByText(/built on peer-reviewed work/i)
+    expect(footer).toHaveTextContent(/McMillan et al\. \(2024\) is why skull shape/i)
+    expect(footer).not.toHaveTextContent(/McMillan et al\. \(2024\) for skull shape/i)
+  })
 })

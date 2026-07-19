@@ -222,6 +222,8 @@ describe('calculateDogAge — results', () => {
     expect(result.recommendations.filter((r) => r.potentialYears > 0)).toHaveLength(0)
   })
 
+  // ~1235 engine calls; ~250ms of actual work. Timeout comes from the global
+  // testTimeout in vite.config.ts.
   it('holds together across every breed in the dataset', () => {
     // A cheap fuzz over the real data — every breed, at several ages.
     for (const breed of BREEDS) {
@@ -263,7 +265,7 @@ describe('the worked example in the README', () => {
     expect(result.lifespan.appliedDeltaYears).toBe(-1.74)
     expect(result.recommendations[0]).toMatchObject({
       title: 'Get to an ideal body condition',
-      potentialYears: 0.9,
+      potentialYears: 0.91,
     })
   })
 })

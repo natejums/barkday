@@ -104,8 +104,8 @@ export function App() {
               ) : null}
 
               <Warnings warnings={result.warnings} />
-              <FactorWaterfall lifespan={result.lifespan} />
-              <Recommendations result={result} />
+              <FactorWaterfall lifespan={result.lifespan} breedKnown={result.breed !== undefined} />
+              <Recommendations result={result} detailsGiven={progress.filled} />
               <ModelComparison models={result.models} />
               <CareGuidance result={result} />
               {result.breed ? <BreedPanel breed={result.breed} /> : null}

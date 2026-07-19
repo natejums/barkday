@@ -1,6 +1,13 @@
 import type { Breed, DogAgeResult } from '../../core'
 
-export function Recommendations({ result }: { result: DogAgeResult }) {
+export function Recommendations({
+  result,
+  detailsGiven,
+}: {
+  result: DogAgeResult
+  /** How many optional details the user has actually filled in. */
+  detailsGiven: number
+}) {
   const { recommendations, profile } = result
   const name = profile.name?.trim() || 'your dog'
 
@@ -10,9 +17,16 @@ export function Recommendations({ result }: { result: DogAgeResult }) {
         <header className="card__header">
           <h2 className="card__title">What would help most</h2>
         </header>
+        {/*
+          An empty list means one of two opposite things, and saying the wrong
+          one costs the page its credibility: with nothing entered there is
+          simply nothing to assess, and congratulating someone on care they
+          never described is not a compliment the model has earned.
+        */}
         <p className="card__subtitle">
-          Nothing to flag from what you've entered — {name} is doing well on every factor the
-          model knows about. Add more detail on the left if you'd like a closer look.
+          {detailsGiven === 0
+            ? 'Nothing to go on yet — this is based on age alone. Fill in body condition and dental care on the left and the model will have something to say here.'
+            : `Nothing to flag from what you've entered — ${name} is doing well on every factor described so far. Add more detail on the left if you'd like a closer look.`}
         </p>
       </section>
     )

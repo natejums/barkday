@@ -18,6 +18,22 @@ describe('yearsBetween', () => {
     expect(yearsBetween(new Date(2021, 0, 1), new Date(2020, 0, 1))).toBeLessThan(0)
   })
 
+  it('is exact on a birthday, which is the day people actually check', () => {
+    // Dividing elapsed milliseconds by a mean year (365.2425 days) put a dog on
+    // its first birthday at 0.99934 years, which the label floored to
+    // "11 months". Anniversaries have to come out whole.
+    for (const [birth, birthday, label] of [
+      [new Date(2025, 0, 1), new Date(2026, 0, 1), '1st'],
+      [new Date(2024, 0, 1), new Date(2026, 0, 1), '2nd'],
+      [new Date(2023, 5, 15), new Date(2026, 5, 15), '3rd'],
+      [new Date(2016, 10, 3), new Date(2026, 10, 3), '10th'],
+    ] as Array<[Date, Date, string]>) {
+      const years = yearsBetween(birth, birthday)
+      expect(years, `${label} birthday`).toBe(Math.round(years))
+      expect(describeYears(years).label, `${label} birthday`).toMatch(/^\d+ years?$/)
+    }
+  })
+
   it('does not drift across a leap year', () => {
     // 2024 is a leap year; four calendar years should still read as ~4.
     expect(yearsBetween(new Date(2022, 0, 1), new Date(2026, 0, 1))).toBeCloseTo(4, 2)

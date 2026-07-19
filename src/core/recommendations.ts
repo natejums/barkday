@@ -8,7 +8,7 @@
  * for the fact that the fifth good habit is worth less than the first.
  */
 
-import { estimateLifespan } from './lifespan'
+import { projectedLifespanYears } from './lifespan'
 import { round } from './units'
 import type { Breed, DogProfile, LifeStageId, Recommendation, SizeClass } from './types'
 
@@ -94,7 +94,9 @@ export function buildRecommendations(
   sizeClass: SizeClass,
   stage: LifeStageId,
 ): Recommendation[] {
-  const current = estimateLifespan(profile, breed, sizeClass).expectedYears
+  // Unrounded and unclamped on both sides of the subtraction — see
+  // projectedLifespanYears for why either one would corrupt the difference.
+  const current = projectedLifespanYears(profile, breed, sizeClass)
 
   const results: Recommendation[] = []
 
@@ -102,7 +104,7 @@ export function buildRecommendations(
     const improved = improvement.apply(profile)
     if (!improved) continue
 
-    const gain = estimateLifespan(improved, breed, sizeClass).expectedYears - current
+    const gain = projectedLifespanYears(improved, breed, sizeClass) - current
     if (gain <= 0.01) continue
 
     results.push({

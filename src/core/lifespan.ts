@@ -276,6 +276,39 @@ export function baselineLifespan(breed: Breed | undefined, sizeClass: SizeClass)
   return lifeExpectancyForSizeClass(sizeClass)
 }
 
+/**
+ * Expected lifespan before display rounding and before the sanity clamp.
+ *
+ * Recommendations are priced by running the whole model twice — once as the dog
+ * is, once with a single thing improved — and diffing. Both of those steps
+ * matter for that diff:
+ *
+ * Rounding first quantises every answer to a tenth of a year, so a change worth
+ * 0.04 years reads as either 0.0 or 0.1 and nothing in between.
+ *
+ * Clamping first is worse. For a dog already at the 5-year floor the clamp
+ * flattens both runs to the same number, the difference comes out as zero, and
+ * the suggestion is dropped as worthless — silently withholding advice from
+ * precisely the dog with the most to gain from it.
+ */
+export function projectedLifespanYears(
+  profile: DogProfile,
+  breed: Breed | undefined,
+  sizeClass: SizeClass,
+): number {
+  const baseline = baselineLifespan(breed, sizeClass)
+  const specs = collectFactors(profile, sizeClass).filter((f) => f.deltaYears !== 0)
+
+  let positives = 0
+  let negatives = 0
+  for (const spec of specs) {
+    if (spec.deltaYears > 0) positives += spec.deltaYears
+    else negatives += spec.deltaYears
+  }
+
+  return baseline + saturate(positives) + saturate(negatives)
+}
+
 export function estimateLifespan(
   profile: DogProfile,
   breed: Breed | undefined,

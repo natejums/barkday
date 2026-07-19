@@ -12,11 +12,17 @@ export default defineConfig(({ command, isPreview }) => ({
   test: {
     globals: true,
     environment: 'jsdom',
+    // jsdom renders the whole app, 247-breed combobox included, and the engine
+    // fuzz pass makes ~1235 calls. Both are fast in isolation (~250ms) and both
+    // brush the 5s default once several files run in parallel on a loaded
+    // machine. A flaky red run teaches people to stop reading CI.
+    testTimeout: 20_000,
     setupFiles: ['./src/test/setup.ts'],
     include: ['src/**/*.test.{ts,tsx}'],
-    // Double-underscore names are throwaway debugging probes (also gitignored).
-    // Excluded so a stray one can never join the suite as a test that passes
-    // without asserting anything.
-    exclude: [...configDefaults.exclude, '**/__*'],
+    // Scratch probes are named `__*` or `tmp*` by convention and gitignored, so
+    // a stray one can neither join the suite nor reach the repo. Worth having:
+    // an automated review left throwaway probes behind here more than once, one
+    // of which threw on purpose to dump state and simply failed the suite.
+    exclude: [...configDefaults.exclude, '**/__*', '**/tmp*.test.*'],
   },
 }))

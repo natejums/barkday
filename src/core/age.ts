@@ -14,9 +14,36 @@ export const MS_PER_YEAR = DAYS_PER_YEAR * MS_PER_DAY
 /**
  * Fractional years between two dates. Negative if `to` precedes `from`;
  * callers are expected to reject that rather than have this silently clamp.
+ *
+ * Counted by calendar anniversaries rather than by dividing elapsed
+ * milliseconds by a mean year. Dividing is very slightly wrong in a way that
+ * lands on the worst possible day: a common year is 365 days against a mean of
+ * 365.2425, so a dog on its first birthday came out at 0.99934 years and the
+ * label rendered "11 months" — on the one day an owner is most likely to look.
+ *
+ * Anniversary arithmetic makes whole birthdays exact by construction, and the
+ * remainder is measured against the length of the year actually in progress, so
+ * leap years account for themselves instead of being averaged away.
  */
 export function yearsBetween(from: Date, to: Date): number {
-  return (to.getTime() - from.getTime()) / MS_PER_YEAR
+  if (to.getTime() < from.getTime()) return -yearsBetween(to, from)
+
+  let years = to.getFullYear() - from.getFullYear()
+
+  const anniversary = new Date(from.getTime())
+  anniversary.setFullYear(from.getFullYear() + years)
+  if (anniversary.getTime() > to.getTime()) {
+    years -= 1
+    anniversary.setFullYear(from.getFullYear() + years)
+  }
+
+  const nextAnniversary = new Date(from.getTime())
+  nextAnniversary.setFullYear(from.getFullYear() + years + 1)
+
+  const spanMs = nextAnniversary.getTime() - anniversary.getTime()
+  if (spanMs <= 0) return years
+
+  return years + (to.getTime() - anniversary.getTime()) / spanMs
 }
 
 export interface AgeParts {

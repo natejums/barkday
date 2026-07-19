@@ -2,6 +2,12 @@ import type { LifespanEstimate } from '../../core'
 
 interface Props {
   lifespan: LifespanEstimate
+  /**
+   * Whether a breed was actually recognised. Without it the baseline is a
+   * size-band population average, and calling that "this breed's" contradicts
+   * the warning shown directly above this card.
+   */
+  breedKnown: boolean
 }
 
 const CONFIDENCE_LABEL = {
@@ -15,8 +21,9 @@ const CONFIDENCE_LABEL = {
  * adjustments. The sign is carried by the ± in the value as well as by hue, so
  * the chart never depends on colour alone.
  */
-export function FactorWaterfall({ lifespan }: Props) {
+export function FactorWaterfall({ lifespan, breedKnown }: Props) {
   const { factors, baselineYears, expectedYears, rawDeltaYears, appliedDeltaYears } = lifespan
+  const baselineSource = breedKnown ? 'this breed and size' : 'a dog of this size'
 
   if (factors.length === 0) {
     return (
@@ -24,8 +31,8 @@ export function FactorWaterfall({ lifespan }: Props) {
         <header className="card__header">
           <h2 className="card__title">What's shaping the estimate</h2>
           <p className="card__subtitle">
-            Nothing beyond the breed baseline of {baselineYears} years so far. Fill in body
-            condition, dental care and daily routine on the left and this will fill out.
+            Nothing beyond the {baselineYears}-year baseline for {baselineSource} so far. Fill in
+            body condition, dental care and daily routine on the left and this will fill out.
           </p>
         </header>
       </section>
@@ -42,7 +49,7 @@ export function FactorWaterfall({ lifespan }: Props) {
           What's shaping the estimate
         </h2>
         <p className="card__subtitle">
-          Starting from a baseline of {baselineYears} years for this breed and size, here is what
+          Starting from a baseline of {baselineYears} years for {baselineSource}, here is what
           each detail contributes.
         </p>
       </header>
