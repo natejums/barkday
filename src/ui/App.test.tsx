@@ -89,10 +89,29 @@ describe('App', () => {
     expect(within(panel).getByText(/by body system/i)).toBeInTheDocument()
   })
 
-  it('defaults the weight unit to pounds', () => {
+  it('defaults the weight unit to pounds and writes it "lbs"', () => {
     render(<App />)
     const unit = screen.getByRole('combobox', { name: /weight unit/i }) as HTMLSelectElement
     expect(unit.value).toBe('lb')
+    expect(screen.getByRole('option', { name: 'lbs' })).toBeInTheDocument()
+  })
+
+  it('keeps the default form short by folding the detailed questions away', () => {
+    render(<App />)
+    // The advanced disclosure exists…
+    expect(screen.getByText(/advanced options/i)).toBeInTheDocument()
+    // …but body condition — the biggest lever — stays up front, out of the fold.
+    expect(screen.getByRole('group', { name: /body condition score/i })).toBeInTheDocument()
+  })
+
+  it('suggests brand-free gear tied to the dog', () => {
+    render(<App />)
+    fireEvent.change(screen.getByRole('combobox', { name: /^breed$/i }), {
+      target: { value: 'Great Dane' },
+    })
+    const gear = screen.getByRole('region', { name: /gear that tends to help/i })
+    expect(within(gear).getByText(/slow-feeder/i)).toBeInTheDocument()
+    expect(within(gear).getByText(/no brands, no links/i)).toBeInTheDocument()
   })
 
   it('spells out how to read the body condition score', () => {

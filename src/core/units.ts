@@ -7,6 +7,16 @@
 
 export type WeightUnit = 'kg' | 'lb'
 
+/**
+ * How each unit is written for people. The internal value stays 'lb' — it's the
+ * key everything keys off — but "lbs" is what owners expect to read.
+ */
+export const WEIGHT_UNIT_LABEL: Readonly<Record<WeightUnit, string>> = { kg: 'kg', lb: 'lbs' }
+
+export function weightUnitLabel(unit: WeightUnit): string {
+  return WEIGHT_UNIT_LABEL[unit]
+}
+
 /** Exact, by definition of the international pound. */
 export const KG_PER_LB = 0.45359237
 
@@ -26,7 +36,7 @@ export function fromKilograms(kilograms: number, unit: WeightUnit): number {
 export function formatWeight(kilograms: number, unit: WeightUnit): string {
   const value = fromKilograms(kilograms, unit)
   const rounded = unit === 'kg' ? Math.round(value * 10) / 10 : Math.round(value)
-  return `${rounded} ${unit}`
+  return `${rounded} ${WEIGHT_UNIT_LABEL[unit]}`
 }
 
 /** Clamps a value into [min, max]. Used all over the modifier code. */

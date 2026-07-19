@@ -22,7 +22,7 @@ describe('formatWeight', () => {
   })
 
   it('rounds pounds to whole numbers', () => {
-    expect(formatWeight(27.34, 'lb')).toBe('60 lb')
+    expect(formatWeight(27.34, 'lb')).toBe('60 lbs')
   })
 })
 
