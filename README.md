@@ -39,9 +39,13 @@ So the modifiers saturate. Positive and negative adjustments are pooled separate
 
 ## What it models
 
-Beyond age and breed: body condition on the 9-point WSAVA scale, sex, neuter status, activity level, diet, dental care, veterinary care, living environment and household smoke exposure. Also mixed ancestry, and the size/lifespan relationship — including the fact that it is **not monotonic**: small dogs slightly outlive toy dogs.
+Beyond age and breed: body condition on the 9-point WSAVA scale, sex, neuter status, activity level, diet, dental care, veterinary care, living environment and household smoke exposure. Also the size/lifespan relationship — including the fact that it is **not monotonic**: small dogs slightly outlive toy dogs.
 
-What it deliberately does *not* model is brachycephaly, and the reason is instructive. Flat-faced breeds sit about 1.9 years below the rest of the dataset already, because their breed lifespan figures are observed lifespans and the airway is priced into them. Subtracting a published skull-shape effect on top would charge a Pug twice for one nose. It reaches the answer through the breed's own baseline instead, and shows up as care guidance rather than arithmetic.
+Two things it deliberately does *not* model, and the reasons are the interesting part.
+
+**Brachycephaly.** Flat-faced breeds sit about 1.9 years below the rest of the dataset already, because their breed lifespan figures are observed lifespans and the airway is priced into them. Subtracting a published skull-shape effect on top would charge a Pug twice for one nose. It reaches the answer through the breed's own baseline instead, and shows up as care guidance rather than arithmetic.
+
+**Mixed ancestry.** "Mutts are healthier" is the most confidently repeated claim in dog folklore, and the two largest datasets disagree about its sign: Montoya (n = 13.3M) puts mixed breeds at 12.71 years against 12.69 for all dogs — a tie — while McMillan (n = 584,734) has crossbreeds *shorter*-lived at 12.0 against 12.7. Two large studies pointing opposite ways is a reason to model nothing, not a reason to average them into a number.
 
 Each factor carries an evidence rating, and the app shows it. A finding from 584,734 dogs and a finding confounded by reverse causation should not look alike, and here they don't.
 
@@ -66,7 +70,7 @@ result.lifeStage.stage            // 'senior'
 result.lifespan.expectedYears     // 10.5
 result.lifespan.rawDeltaYears     // -1.98  (what the factors sum to)
 result.lifespan.appliedDeltaYears // -1.74  (what saturation allowed through)
-result.recommendations[0]         // { title: 'Get to an ideal body condition', potentialYears: 0.9, … }
+result.recommendations[0]         // { title: 'Get to an ideal body condition', potentialYears: 0.91, … }
 ```
 
 Recommendations are not a lookup table. Each one re-runs the whole lifespan model with that single change applied and reports the difference — so the years quoted already account for saturation and for overlap with everything else the dog has going on.
@@ -88,12 +92,13 @@ The test suite covers the models against their published tables, dataset invaria
 Every constant is traceable, and [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md) lists them with sources and caveats. The main ones:
 
 - **Montoya et al. (2023)** — life expectancy by size band, n = 13,292,929
-- **McMillan et al. (2024)** — lifespan by skull shape, n = 584,734
 - **Salt et al. (2019)** — body condition and lifespan, n = 50,787
 - **Kealy et al. (2002)**, the Purina Life Span Study — caloric restriction, +1.8 years
 - **Wang et al. (2020)** — the DNA-methylation clock
 - **AAHA Canine Life Stage Guidelines** — the proportional stage definitions
 - **Glickman et al. (2011)** — periodontal disease and kidney disease, n = 164,706
+
+**McMillan et al. (2024)** (n = 584,734) is cited throughout but no number is taken from it. It is the evidence for the two modifiers deliberately left out — skull shape and mixed ancestry — and it earns its place by ruling things out rather than by contributing a constant.
 
 Where a figure is this project's derivation rather than something an author published, the code says so at the point of use and rates it low confidence. The per-point body condition costs are the clearest example: Salt et al. support a binary overweight-vs-ideal comparison, not a continuous dose-response. A calculator needs a slider; the study didn't provide one.
 

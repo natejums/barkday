@@ -121,11 +121,11 @@ export function App() {
           something seems wrong with your dog, ask a vet — not a website.
         </p>
         <p>
-          Built on peer-reviewed work: Montoya et al. (2023) for life expectancy by size,
-          McMillan et al. (2024) for skull shape, Salt et al. (2019) for body condition, the
-          Purina Life Span Study for caloric restriction, and the AAHA Canine Life Stage
-          Guidelines for the stage boundaries. The sources, the constants and their caveats are
-          all in the repository.
+          Built on peer-reviewed work: Montoya et al. (2023) for life expectancy by size, Salt
+          et al. (2019) for body condition, the Purina Life Span Study for caloric restriction,
+          and the AAHA Canine Life Stage Guidelines for the stage boundaries. McMillan et al.
+          (2024) is why skull shape and mixed ancestry are deliberately <em>not</em> modelled.
+          The sources, the constants and their caveats are all in the repository.
         </p>
         <p>
           <a href={REPO_URL}>Source on GitHub</a> · MIT licensed
