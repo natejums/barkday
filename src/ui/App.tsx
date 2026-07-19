@@ -3,7 +3,7 @@ import { calculateDogAge } from '../core'
 import { completeness, DEFAULT_STATE, toProfile, type FormPatch, type FormState } from './formState'
 import { DogForm } from './components/DogForm'
 import { FactorWaterfall } from './components/FactorWaterfall'
-import { BreedPanel, CareGuidance, Recommendations, Warnings } from './components/Guidance'
+import { BreedHealth, CareGuidance, Recommendations, Warnings } from './components/Guidance'
 import { HeroResult } from './components/HeroResult'
 import { ModelComparison } from './components/ModelComparison'
 
@@ -108,7 +108,7 @@ export function App() {
               <Recommendations result={result} detailsGiven={progress.filled} />
               <ModelComparison models={result.models} />
               <CareGuidance result={result} />
-              {result.breed ? <BreedPanel breed={result.breed} /> : null}
+              {result.breedHealth ? <BreedHealth result={result} /> : null}
             </>
           )}
         </div>

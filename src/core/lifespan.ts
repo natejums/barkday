@@ -8,6 +8,8 @@
 
 import {
   BCS_PENALTY_PER_POINT,
+  EARLY_NEUTER_LARGE_BREED_OFFSET,
+  EARLY_NEUTER_MONTHS,
   FEMALE_LIFESPAN_BONUS,
   IDEAL_BCS_RANGE,
   MODIFIER_SATURATION_YEARS,
@@ -97,6 +99,56 @@ function bodyConditionFactor(bcs: number, sizeClass: SizeClass): FactorSpec | nu
   }
 }
 
+/**
+ * The neuter effect, made timing-aware for the breeds where timing matters.
+ *
+ * The population signal is clear — neutered dogs outlive intact ones almost
+ * everywhere it has been measured — so the baseline is a bonus. But Hart et al.
+ * (2020) found that in larger breeds, neutering before the growth plates close
+ * raises the rate of joint disorders and some cancers. So for a large or giant
+ * dog neutered inside its first year, part of that bonus is given back.
+ *
+ * It is kept a single factor rather than a bonus plus a separate penalty on
+ * purpose: they are the same causal story, and splitting them would let the
+ * saturation logic treat one household's decision as two independent events.
+ * The net stays positive, matching the population data that an early-neutered
+ * large dog still tends to outlive an intact one.
+ */
+function neuterFactor(sizeClass: SizeClass, neuterAgeMonths: number | undefined): FactorSpec {
+  const bigBreed = sizeClass === 'large' || sizeClass === 'giant'
+  const early = neuterAgeMonths !== undefined && neuterAgeMonths < EARLY_NEUTER_MONTHS
+
+  if (bigBreed && early) {
+    return {
+      id: 'neuter',
+      label: 'Neutered young (large breed)',
+      deltaYears: NEUTER_BONUS - EARLY_NEUTER_LARGE_BREED_OFFSET,
+      confidence: 'low',
+      explanation:
+        `Neutered dogs outlive intact ones in essentially every population dataset. But this is ` +
+        `a large breed neutered before a year old, and Hart et al. (2020) found early neutering ` +
+        `raises the rate of joint disorders and some cancers specifically in bigger dogs — so ` +
+        `part of the usual benefit is discounted here. The net is still positive, matching the ` +
+        `population picture; the size of the discount is this project's derivation rather than a ` +
+        `published figure, hence low confidence. Keep them lean and their growing joints ` +
+        `low-impact.`,
+    }
+  }
+
+  return {
+    id: 'neuter',
+    label: 'Neutered',
+    deltaYears: NEUTER_BONUS,
+    confidence: 'moderate',
+    explanation:
+      `Neutered dogs outlive intact ones in essentially every population dataset, partly ` +
+      `through removing reproductive cancers and roaming behaviour. The effect is entangled ` +
+      `with the kind of household that neuters its dogs. In large and giant breeds the timing ` +
+      `matters more than the decision — neutering before 12 months raises joint-disorder risk — ` +
+      `but past a year, or in smaller dogs, that concern falls away.`,
+  }
+}
+
 function collectFactors(profile: DogProfile, sizeClass: SizeClass) {
   const factors: FactorSpec[] = []
 
@@ -144,18 +196,7 @@ function collectFactors(profile: DogProfile, sizeClass: SizeClass) {
   }
 
   if (profile.neuterStatus === 'neutered') {
-    factors.push({
-      id: 'neuter',
-      label: 'Neutered',
-      deltaYears: NEUTER_BONUS,
-      confidence: 'moderate',
-      explanation:
-        `Neutered dogs outlive intact ones in essentially every population dataset, partly ` +
-        `through removing reproductive cancers and roaming behaviour. The effect is entangled ` +
-        `with the kind of household that neuters its dogs. Note that neutering large breeds ` +
-        `before 12 months does raise joint disorder risk — timing matters more than the ` +
-        `decision itself.`,
-    })
+    factors.push(neuterFactor(sizeClass, profile.neuterAgeMonths))
   }
 
   const activityDeltas: Record<NonNullable<DogProfile['activityLevel']>, number> = {

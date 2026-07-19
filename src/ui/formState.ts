@@ -32,6 +32,13 @@ export interface FormState {
   // the latter. Saying so here is better than turning the check off.
   sex?: Sex | undefined
   neuterStatus?: NeuterStatus | undefined
+  /**
+   * When the dog was neutered, coarsened to the only distinction the model
+   * makes: before a year old versus at a year or later. Offering an exact month
+   * would imply a precision the model doesn't have — it only reacts to the
+   * 12-month line, and only for large breeds.
+   */
+  neuterTiming?: 'early' | 'adult' | undefined
   bodyConditionScore?: number | undefined
   activityLevel?: ActivityLevel | undefined
   dietQuality?: DietQuality | undefined
@@ -95,6 +102,11 @@ export function toProfile(state: FormState, now: Date): DogProfile | null {
     ...(hasWeight ? { weightKg: toKilograms(weightValue, state.weightUnit) } : {}),
     ...(state.sex ? { sex: state.sex } : {}),
     ...(state.neuterStatus ? { neuterStatus: state.neuterStatus } : {}),
+    // Map the two-way timing choice onto a representative month value the engine
+    // can read. Only meaningful alongside a 'neutered' status, so gated on it.
+    ...(state.neuterStatus === 'neutered' && state.neuterTiming
+      ? { neuterAgeMonths: state.neuterTiming === 'early' ? 6 : 18 }
+      : {}),
     ...(state.bodyConditionScore !== undefined
       ? { bodyConditionScore: state.bodyConditionScore }
       : {}),

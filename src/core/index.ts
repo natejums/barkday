@@ -28,6 +28,14 @@ export { classifyLifeStage, lifeStageDefinition, stageBoundaries } from './lifeS
 export { buildRecommendations } from './recommendations'
 
 export {
+  buildBreedHealth,
+  matchCondition,
+  CONDITION_CATALOG,
+  BODY_SYSTEM_LABELS,
+  BODY_SYSTEM_ORDER,
+} from './health'
+
+export {
   chartBandFromSizeClass,
   chartBandFromWeight,
   isUsableWeight,
@@ -51,13 +59,20 @@ export { ALL_DOGS_LIFE_EXPECTANCY, SIZE_BANDS } from './constants'
 
 export type {
   ActivityLevel,
+  BodySystem,
   Breed,
+  BreedHealthReport,
   ChartBand,
+  ConditionInfo,
+  ConditionSeverity,
   Confidence,
   DentalCare,
   DietQuality,
   DogAgeResult,
   DogProfile,
+  HealthCallout,
+  HealthConcern,
+  HealthSystemGroup,
   LifeStageId,
   LifeStageInfo,
   LifespanEstimate,
@@ -65,6 +80,7 @@ export type {
   LivingEnvironment,
   ModelEstimate,
   NeuterStatus,
+  OnsetStage,
   Recommendation,
   Sex,
   SizeClass,

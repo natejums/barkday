@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { App } from './App'
 
@@ -70,6 +70,34 @@ describe('App', () => {
     expect(screen.getByText(/population averages were assumed/i)).toBeInTheDocument()
     expect(screen.getByText(/baseline for a dog of this size/i)).toBeInTheDocument()
     expect(screen.queryByText(/for this breed and size/i)).not.toBeInTheDocument()
+  })
+
+  it('shows a breed-specific health panel once a breed is set', () => {
+    render(<App />)
+
+    // No breed on the landing view, so no health panel yet.
+    expect(screen.queryByRole('region', { name: /health to watch/i })).not.toBeInTheDocument()
+
+    fireEvent.change(screen.getByRole('combobox', { name: /breed/i }), {
+      target: { value: 'Great Dane' },
+    })
+
+    const panel = screen.getByRole('region', { name: /great dane — health to watch/i })
+    // A deep-chested breed gets the bloat feeding callout.
+    expect(within(panel).getByText(/guard against bloat/i)).toBeInTheDocument()
+    // And the full documented list is reachable.
+    expect(within(panel).getByText(/by body system/i)).toBeInTheDocument()
+  })
+
+  it('reveals the neuter-timing question only after a dog is marked neutered', () => {
+    render(<App />)
+
+    expect(screen.queryByRole('group', { name: /neutered before a year/i })).not.toBeInTheDocument()
+
+    const neuterGroup = screen.getByRole('group', { name: /neutered or spayed/i })
+    fireEvent.click(within(neuterGroup).getByRole('button', { name: /^yes$/i }))
+
+    expect(screen.getByRole('group', { name: /neutered before a year/i })).toBeInTheDocument()
   })
 
   it('credits McMillan for what it rules out rather than for a modifier', () => {

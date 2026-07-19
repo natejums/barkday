@@ -61,6 +61,13 @@ export interface DogProfile {
   weightKg?: number
   sex?: Sex
   neuterStatus?: NeuterStatus
+  /**
+   * Age in months at which the dog was neutered or spayed. Only refines the
+   * estimate for large and giant breeds, where the timing genuinely matters —
+   * Hart et al. (2020) found early neutering raises joint-disorder and some
+   * cancer risk in bigger dogs. Ignored when neuterStatus isn't 'neutered'.
+   */
+  neuterAgeMonths?: number
   /** Body condition on the 9-point WSAVA scale, where 4–5 is ideal. */
   bodyConditionScore?: number
   activityLevel?: ActivityLevel
@@ -131,6 +138,124 @@ export interface Recommendation {
   priority: 'high' | 'medium' | 'low'
 }
 
+// ---------------------------------------------------------------------------
+// Breed health
+// ---------------------------------------------------------------------------
+
+/**
+ * The body system a condition primarily affects. Used to group a breed's
+ * concerns into something scannable rather than a flat wall of pills.
+ */
+export type BodySystem =
+  | 'orthopedic'
+  | 'cardiac'
+  | 'ocular'
+  | 'neurological'
+  | 'cancer'
+  | 'endocrine'
+  | 'respiratory'
+  | 'dermatological'
+  | 'gastrointestinal'
+  | 'urinary'
+  | 'hepatic'
+  | 'haematological'
+  | 'dental'
+  | 'aural'
+  | 'immune'
+  | 'other'
+
+/**
+ * How urgently a condition tends to matter. `emergency` is reserved for things
+ * that kill within hours if ignored — bloat, not arthritis — so the label
+ * carries real information rather than blanket alarm.
+ */
+export type ConditionSeverity = 'monitor' | 'serious' | 'emergency'
+
+/** The life stage a condition typically first appears in. `any` when it isn't age-linked. */
+export type OnsetStage = 'puppy' | 'young-adult' | 'mature-adult' | 'senior' | 'any'
+
+/**
+ * One entry in the condition catalogue: general, well-established veterinary
+ * knowledge about a named canine condition. This is educational reference
+ * material, deliberately breed-agnostic — the breed-specific claim is which
+ * conditions a breed is predisposed to, which lives in the breed data.
+ */
+export interface ConditionInfo {
+  id: string
+  name: string
+  /**
+   * Lower-case fragments used to link a breed's free-text risk phrasing to this
+   * entry. Longest match wins, so "hip dysplasia" beats a bare "hip".
+   */
+  aliases: readonly string[]
+  system: BodySystem
+  severity: ConditionSeverity
+  typicalOnset: OnsetStage
+  /**
+   * A catch-all entry (e.g. "heart disease", "inherited eye conditions"). These
+   * only match when nothing more specific does, so a phrase that names an actual
+   * condition never gets swallowed by a vaguer one that happens to be longer.
+   */
+  generic?: boolean
+  /** Cardinal signs an owner can actually notice, in plain language. */
+  signs: string
+  /** What genuinely helps: screening, prevention or management. */
+  action: string
+  /** General veterinary references. Not breed-specific statistics. */
+  references: readonly string[]
+}
+
+/**
+ * One health concern as surfaced for a specific dog. The breed's own wording is
+ * always preserved; the catalogue entry, when one matched, enriches it.
+ */
+export interface HealthConcern {
+  /** The breed data's own phrasing, verbatim. Never rewritten. */
+  label: string
+  /** Enriched catalogue detail, present only when the label matched an entry. */
+  condition?: ConditionInfo
+  system: BodySystem
+  severity: ConditionSeverity
+  /** True when this concern is one to watch for around the dog's current age. */
+  relevantNow: boolean
+}
+
+/** A profile-aware, actionable health note — the cross-references, not the list. */
+export interface HealthCallout {
+  id: string
+  title: string
+  detail: string
+  severity: ConditionSeverity
+}
+
+export interface HealthSystemGroup {
+  system: BodySystem
+  label: string
+  concerns: readonly HealthConcern[]
+}
+
+/**
+ * A breed's health picture, personalised to one dog's age and profile.
+ *
+ * Nothing here is a diagnosis or a prediction. It is the breed's documented
+ * predispositions, organised, prioritised for the dog's life stage, and
+ * cross-referenced against the profile — so an owner knows what to watch for
+ * and what to raise with a vet, not what their dog has.
+ */
+export interface BreedHealthReport {
+  breedName: string
+  /** Every documented concern for the breed, enriched where possible. */
+  concerns: readonly HealthConcern[]
+  /** Concerns grouped by body system, each group ordered by severity. */
+  bySystem: readonly HealthSystemGroup[]
+  /** What to watch for around this age, most severe first. May be empty. */
+  priorityNow: readonly HealthConcern[]
+  /** Profile-specific callouts: feeding for bloat-prone breeds, heat for flat faces, and so on. */
+  callouts: readonly HealthCallout[]
+  /** True once the dog reaches a stage where screening genuinely changes outcomes. */
+  screeningMatters: boolean
+}
+
 export interface DogAgeResult {
   profile: DogProfile
   breed?: Breed
@@ -152,6 +277,12 @@ export interface DogAgeResult {
     label: string
   }
   recommendations: readonly Recommendation[]
+  /**
+   * The breed's health picture, personalised to this dog's age and profile.
+   * Present only when the breed was recognised — health predispositions are
+   * breed-specific, and a size band has none to report.
+   */
+  breedHealth?: BreedHealthReport
   /** Anything the caller should know about the quality of this answer. */
   warnings: readonly string[]
 }
