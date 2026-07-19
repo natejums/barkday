@@ -100,6 +100,47 @@ describe('breed-driven factors', () => {
   })
 })
 
+describe('neuter timing', () => {
+  const base: DogProfile = { ageYears: 5, neuterStatus: 'neutered' }
+  const greatDane = findBreed('Great Dane')!
+
+  function neuter(profile: DogProfile, sizeClass: Parameters<typeof estimateLifespan>[2]) {
+    return estimateLifespan(profile, undefined, sizeClass).factors.find((f) => f.id === 'neuter')
+  }
+
+  it('gives the full neuter benefit when timing is unknown', () => {
+    const factor = neuter(base, 'large')
+    expect(factor?.deltaYears).toBeCloseTo(0.5, 6)
+    expect(factor?.confidence).toBe('moderate')
+  })
+
+  it('discounts the benefit for a large breed neutered before a year', () => {
+    const early = neuter({ ...base, neuterAgeMonths: 6 }, 'large')
+    expect(early?.deltaYears).toBeGreaterThan(0) // still a net positive
+    expect(early?.deltaYears).toBeLessThan(0.5) // but less than the full bonus
+    expect(early?.confidence).toBe('low')
+    expect(early?.label.toLowerCase()).toContain('young')
+  })
+
+  it('restores the full benefit once a large breed is neutered as an adult', () => {
+    const adult = neuter({ ...base, neuterAgeMonths: 18 }, 'large')
+    expect(adult?.deltaYears).toBeCloseTo(0.5, 6)
+    expect(adult?.confidence).toBe('moderate')
+  })
+
+  it('ignores timing for small breeds — Hart found no comparable signal', () => {
+    const early = neuter({ ...base, neuterAgeMonths: 6 }, 'small')
+    expect(early?.deltaYears).toBeCloseTo(0.5, 6)
+    expect(early?.confidence).toBe('moderate')
+  })
+
+  it('leaves an early-neutered large dog still ahead of an intact one', () => {
+    const early = estimateLifespan({ ...base, neuterAgeMonths: 6 }, greatDane, 'giant')
+    const intact = estimateLifespan({ ageYears: 5, neuterStatus: 'intact' }, greatDane, 'giant')
+    expect(early.expectedYears).toBeGreaterThan(intact.expectedYears)
+  })
+})
+
 describe('modifier saturation', () => {
   const everythingGood: DogProfile = {
     ageYears: 5,

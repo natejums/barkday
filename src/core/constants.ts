@@ -249,6 +249,41 @@ export const FEMALE_LIFESPAN_BONUS = 0.13
 export const NEUTER_BONUS = 0.5
 
 /**
+ * The line below which "neutered early" starts to matter, in months.
+ *
+ * Hart et al. (2020) found the excess joint-disorder and cancer risk in larger
+ * breeds concentrated in dogs neutered before their growth plates closed —
+ * roughly the first year. Timing under this threshold is what the model reacts
+ * to; a dog neutered as an adult keeps the full benefit.
+ */
+export const EARLY_NEUTER_MONTHS = 12
+
+/**
+ * How much of the neuter benefit an early neuter costs back, for large and
+ * giant breeds only.
+ *
+ * This is a derivation, not a published lifespan figure, and it ships as low
+ * confidence. Hart et al. reported disorder *rates* — e.g. joint disorders
+ * roughly doubling in some large breeds neutered before a year — not years of
+ * life. Translating that into a partial offset of the +0.5 neuter bonus is this
+ * project's own bridge from "raises the rate of life-limiting joint disease and
+ * some cancers" to "trims some of the longevity advantage back". It is kept
+ * deliberately smaller than the bonus, so an early-neutered large dog still
+ * comes out slightly ahead of an intact one, matching the population picture
+ * while acknowledging the timing cost. Small and toy breeds are unaffected —
+ * Hart found no comparable signal in them.
+ *
+ * One more honest caveat: Hart's effect is breed-specific, and several large
+ * breeds it studied showed no increase at all. Firing on size class alone
+ * generalises past that — defensible only because the mechanism (hormone-driven
+ * growth-plate timing) really does scale with body size, unlike a skull-shape
+ * average, and because this doesn't double-count the way brachycephaly would.
+ * It is a deliberate simplification, which is part of why it is rated low and
+ * kept small. METHODOLOGY.md spells this out.
+ */
+export const EARLY_NEUTER_LARGE_BREED_OFFSET = 0.35
+
+/**
  * Saturation limit for stacked modifiers, in years, applied separately to the
  * positive and negative side.
  *

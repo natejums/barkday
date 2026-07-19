@@ -104,6 +104,7 @@ Baseline is the breed's population lifespan midpoint, or the size-class figure w
 | Underweight, per point under 4 | −0.3 yr | Low | Usually a marker of illness, not a cause |
 | Female | +0.13 yr | High | Montoya 2023: 12.76 vs 12.63 |
 | Neutered | +0.5 yr | Moderate | Population data; confounded by owner type |
+| Neutered young, large/giant breed | +0.5 − 0.35 = +0.15 yr | **Low — derived** | Hart 2020; rate-to-years translation is ours |
 | Dental care | −0.8 (none) → +0.5 (professional) | Moderate | Glickman 2011, n = 164,706 |
 | Veterinary care | −1.0 (none) → +0.5 (twice-yearly) | Moderate | Preventive care and parasite compliance |
 | Activity | −0.5 (sedentary) → +0.4 (very active) | Low | Dog Aging Project; reverse causation likely |
@@ -123,6 +124,16 @@ Only the third points the way folklore does, and it is an ecological correlation
 
 An earlier version of this model shipped a +0.3 year bonus here. That was fifteen times the effect its own cited source reported, and the opposite sign to a study cited a few lines away in the same file. Two large datasets pointing in opposite directions is a reason to model nothing, not a reason to average them into a number.
 
+**What *is* modelled is composition, which is a different question.** When an owner
+knows their dog is, say, 60% Labrador and 40% Poodle, the engine blends the two
+breeds' observed size and lifespan baselines by those percentages and pools their
+documented health risks. That is not the mutt bonus above — it adds no
+heterozygosity credit and no crossbreed penalty, and a 50/50 cross with no
+lifestyle factors lands exactly on the blended baseline. It only uses the
+composition the owner supplied to produce a better starting point than a generic
+size-band average. Where the *bonus* question has no honest answer, the
+*composition* question does, and the two are kept strictly separate.
+
 ### On brachycephaly, which is deliberately absent
 
 McMillan et al. (2024) is a strong result — brachycephalic breeds have a median lifespan of 11.2 years against 12.8 for mesocephalic ones, across 584,734 dogs. An earlier version of this model applied it as a −1.6 year modifier. That was wrong, and the reason is the same one this whole section is about.
@@ -132,6 +143,54 @@ The breed baselines are *observed* lifespans. Flat-faced breeds already average 
 Worse, it applied the population average to breeds that contradict it. A Shih Tzu is brachycephalic and lives about 14 years; the penalty docked it anyway. Using the observed baseline instead lets a long-lived flat-faced breed read as long-lived, and a Pug read as short-lived, which is what the data actually says about each of them.
 
 Brachycephaly still reaches the user — as breed health risks and as care guidance about heat, harnesses and airway signs. It just does not get counted twice in the arithmetic.
+
+### On neuter timing, which is modelled — carefully
+
+Neutering earns a +0.5-year bonus because neutered dogs outlive intact ones in
+essentially every population dataset. But *when* it happens matters. Hart et al.
+(2020), across 35 breeds, found that in a number of the larger ones, neutering
+before the growth plates close — roughly the first year — raised the rate of
+joint disorders (hip and elbow dysplasia, cruciate rupture) and, in several
+breeds, certain cancers. It found no comparable signal in small breeds.
+
+So the neuter factor is timing-aware: a large or giant dog neutered before 12
+months keeps only part of the bonus (+0.15 rather than +0.5). The important
+honesty caveat is that **Hart reported disorder rates, not lifespan years.**
+Translating "joint disorders roughly double" into "give back 0.35 of a year" is
+this project's own bridge, not a figure any author published, so it ships as
+**low confidence** and is documented as a derivation at the point of use — the
+same standard applied to the body-condition per-point costs.
+
+**And a second caveat, which the brachycephaly section demands be stated
+plainly.** Hart's effect is *breed-specific and heterogeneous* — several of the
+large breeds it studied showed no significant increase at any neuter age, and the
+cancer signal appeared only in some. Applying the discount to every large and
+giant breed by size class alone is therefore a generalisation beyond what Hart
+established for any one breed, and it is the same *shape* of move this document
+rejects for brachycephaly: imposing a group average on individuals that may
+contradict it. Two things keep it defensible here where the skull-shape penalty
+was not. First, the mechanism genuinely scales with the proxy: neutering removes
+the hormones that signal growth-plate closure, so later closure and altered joint
+loading really are a function of how big and how slow-maturing the dog is —
+whereas skull shape has no such size gradient. Second, unlike the brachycephaly
+penalty, this does not double-count, because neuter timing is not already priced
+into the observed breed baseline the way the airway is. It remains a deliberate
+simplification, though, and that is a large part of why it is rated low
+confidence and kept small. The more evidence-faithful alternative — restricting
+the discount to the specific breeds Hart implicated — was rejected only because
+Hart studied 35 of 247 breeds, so a per-breed rule would be as silent about the
+other 212 as the size proxy is, without being any more honest about them.
+
+Two design choices follow from the principles elsewhere in this document. It is
+kept a **single factor with a net-positive delta**, not a bonus plus a separate
+penalty, because early neutering is one causal story and splitting it would let
+the saturation logic double-count it. And the net stays positive, because that
+is what the population data shows — an early-neutered large dog still tends to
+outlive an intact one. The timing cost is a discount on an advantage, not a
+reversal of it.
+
+Timing also reaches the user as care guidance — a prompt to watch the joints —
+in the breed-health panel, not only as arithmetic.
 
 ### On the body condition figures
 
@@ -165,6 +224,54 @@ These are not formal confidence intervals. They are a defensible spread, and the
 
 Size class is computed from the weight midpoint rather than stored independently, so the dataset cannot drift out of agreement with the bands the lifespan model uses. Tested across all 247 entries, along with weight/lifespan coherence, alias collisions and duplicate names.
 
+## 7. Breed health
+
+Each breed carries a hand-written list of documented predispositions. On its own
+that is a wall of terms; the health module turns it into something an owner can
+act on, without inventing anything breed-specific.
+
+**A condition catalogue.** About 66 well-established canine conditions, each
+described in breed-agnostic terms: which body system it affects, roughly how
+serious and how urgent it is, the life stage it typically first appears in, the
+signs an owner can actually notice, and what genuinely helps. These are textbook
+veterinary facts — the same evidence tier as the AAHA and AVMA material the rest
+of the engine uses — referenced to the Merck Veterinary Manual and the relevant
+specialty colleges (ACVS, ACVO, ACVIM), and framed as general education, not
+diagnosis.
+
+The catalogue is deliberately breed-agnostic. The only breed-specific claim is
+*which* conditions a breed is prone to, and that already lives in the breed data,
+written by hand. The catalogue never adds a predisposition to a breed; it only
+enriches one the breed data already states.
+
+**Matching, not rewriting.** Each free-text risk is linked to a catalogue entry
+by matching against alias fragments, longest-match-wins, with catch-all entries
+("heart disease", "inherited eye conditions") consulted only when nothing
+specific matches — so "entropion" is never swallowed by a vaguer, longer phrase.
+The breed's own wording is always shown verbatim; a match only adds detail
+beneath it. About 91% of the ~1,160 risk phrases across the dataset link to an
+entry; the rest stay as plain text rather than being forced into a wrong bucket.
+A test guards the match rate against regressions.
+
+**Personalised to the dog, not just the breed.** A condition is flagged
+"relevant around this age" when the dog is within one life stage of the
+condition's typical onset — the coming-up-or-just-arrived window — with two
+exceptions that are always relevant: acute emergencies (bloat), and conditions
+that are not age-linked at all (a clotting disorder, anaesthetic sensitivity). So
+a senior's highlighted list is about senior things, and a puppy's is about
+developmental ones, drawn from the same breed data.
+
+**Profile cross-references.** A handful of callouts fire on the profile rather
+than the breed alone: feeding guidance for a deep-chested bloat-prone breed,
+airway and heat guidance for a flat-faced one, an anaesthetic-sensitivity flag
+for sighthounds, and a joint-monitoring prompt for a large breed neutered early.
+Each is triggered by a matched condition plus a fact about the individual dog.
+
+Nothing here is a diagnosis or a prediction about the individual animal. It is
+the breed's documented predispositions, organised, prioritised for the dog's age,
+and cross-referenced against the profile — so an owner knows what to watch for
+and what to raise with a vet.
+
 ## References
 
 1. Montoya M. et al. (2023). Life expectancy tables for dogs and cats derived from clinical data. *Frontiers in Veterinary Science*. https://www.frontiersin.org/articles/10.3389/fvets.2023.1082102/full
@@ -179,3 +286,6 @@ Size class is computed from the weight midpoint rather than stored independently
 10. AVMA — Senior pet care. https://www.avma.org/resources-tools/pet-owners/petcare/senior-pets
 11. AKC dog age chart. https://www.akc.org/wp-content/uploads/2015/11/Dog_Age_Chart_Proof_01Blue.jpg
 12. Metzger F.L. — IDEXX preventive care age chart. https://www.idexx.com/files/preventive-brochures-age-chart.pdf
+13. Merck Veterinary Manual — the general clinical reference behind the condition catalogue. https://www.merckvetmanual.com/
+14. American College of Veterinary Surgeons (ACVS), Ophthalmologists (ACVO) and Internal Medicine (ACVIM) small-animal condition references. https://www.acvs.org/small-animal · https://www.acvo.org · https://www.acvim.org
+15. Orthopedic Foundation for Animals (OFA) — screening for inherited orthopaedic and other disease. https://www.ofa.org

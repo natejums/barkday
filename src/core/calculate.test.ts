@@ -245,6 +245,100 @@ describe('calculateDogAge — results', () => {
   })
 })
 
+describe('calculateDogAge — breed health', () => {
+  it('attaches a health report when the breed is known', () => {
+    const result = calculateDogAge({ ageYears: 6, breedName: 'Great Dane' })
+    expect(result.breedHealth).toBeDefined()
+    expect(result.breedHealth!.breedName).toBe('Great Dane')
+    expect(result.breedHealth!.concerns.length).toBeGreaterThan(0)
+  })
+
+  it('omits the health report when no breed is recognised', () => {
+    expect(calculateDogAge({ ageYears: 6 }).breedHealth).toBeUndefined()
+    expect(calculateDogAge({ ageYears: 6, weightKg: 30 }).breedHealth).toBeUndefined()
+    expect(calculateDogAge({ ageYears: 6, breedName: 'Direwolf' }).breedHealth).toBeUndefined()
+  })
+
+  it('re-prioritises concerns for the same breed as the dog ages', () => {
+    const puppy = calculateDogAge({ ageYears: 0.5, breedName: 'Great Dane' })
+    const senior = calculateDogAge({ ageYears: 8, breedName: 'Great Dane' })
+
+    const priorityIds = (r: typeof puppy) =>
+      new Set(r.breedHealth!.priorityNow.map((c) => c.condition?.id))
+
+    // Bloat is an emergency and always present; the age-linked ones move.
+    expect(priorityIds(senior).has('osteosarcoma')).toBe(true)
+    expect(priorityIds(puppy).has('osteosarcoma')).toBe(false)
+    expect(senior.breedHealth!.screeningMatters).toBe(true)
+    expect(puppy.breedHealth!.screeningMatters).toBe(false)
+  })
+
+  it('carries an early-neuter joint callout end to end', () => {
+    const result = calculateDogAge({
+      ageYears: 2,
+      breedName: 'Rottweiler',
+      neuterStatus: 'neutered',
+      neuterAgeMonths: 6,
+    })
+    expect(result.breedHealth!.callouts.map((c) => c.id)).toContain('early-neuter-joints')
+    // And the same timing shows up in the lifespan factors, not just the advice.
+    const neuter = result.lifespan.factors.find((f) => f.id === 'neuter')
+    expect(neuter?.deltaYears).toBeLessThan(0.5)
+  })
+})
+
+describe('calculateDogAge — mixed breeds', () => {
+  it('blends a known mix into a single breed and reports on it', () => {
+    const result = calculateDogAge({
+      ageYears: 5,
+      breedComposition: [
+        { breedName: 'Great Dane', fraction: 50 },
+        { breedName: 'Poodle (Standard)', fraction: 50 },
+      ],
+    })
+    expect(result.breed?.name).toMatch(/great dane/i)
+    expect(result.breed?.name).toMatch(/poodle/i)
+    expect(result.breedHealth).toBeDefined()
+    // Its expected lifespan sits between the two parents' baselines.
+    const dane = calculateDogAge({ ageYears: 5, breedName: 'Great Dane' })
+    const poodle = calculateDogAge({ ageYears: 5, breedName: 'Poodle (Standard)' })
+    expect(result.lifespan.baselineYears).toBeGreaterThan(dane.lifespan.baselineYears)
+    expect(result.lifespan.baselineYears).toBeLessThan(poodle.lifespan.baselineYears)
+  })
+
+  it('lets the composition take precedence over a stray breed name', () => {
+    const result = calculateDogAge({
+      ageYears: 5,
+      breedName: 'Chihuahua',
+      breedComposition: [{ breedName: 'Labrador Retriever', fraction: 100 }],
+    })
+    expect(result.breed?.name).toBe('Labrador Retriever')
+  })
+
+  it('warns and falls back when no breed in the mix is recognised', () => {
+    const result = calculateDogAge({
+      ageYears: 5,
+      breedComposition: [{ breedName: 'Direwolf', fraction: 60 }, { breedName: 'Nessie', fraction: 40 }],
+    })
+    expect(result.breed).toBeUndefined()
+    expect(result.breedHealth).toBeUndefined()
+    expect(result.warnings.join(' ')).toMatch(/none of the breeds in the mix/i)
+  })
+
+  it('applies no mixed-breed bonus — the blend is baseline only', () => {
+    // A 50/50 of two breeds with no lifestyle factors should land exactly on the
+    // blended baseline, with no crossbreed credit added on top.
+    const result = calculateDogAge({
+      ageYears: 5,
+      breedComposition: [
+        { breedName: 'Beagle', fraction: 50 },
+        { breedName: 'Border Collie', fraction: 50 },
+      ],
+    })
+    expect(result.lifespan.expectedYears).toBe(result.lifespan.baselineYears)
+  })
+})
+
 describe('the worked example in the README', () => {
   // Pinned so the documented output can't quietly drift away from the code.
   it('still produces the numbers the README quotes', () => {

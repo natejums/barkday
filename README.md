@@ -39,13 +39,17 @@ So the modifiers saturate. Positive and negative adjustments are pooled separate
 
 ## What it models
 
-Beyond age and breed: body condition on the 9-point WSAVA scale, sex, neuter status, activity level, diet, dental care, veterinary care, living environment and household smoke exposure. Also the size/lifespan relationship — including the fact that it is **not monotonic**: small dogs slightly outlive toy dogs.
+Beyond age and breed: body condition on the 9-point WSAVA scale, sex, neuter status **and neuter timing**, activity level, diet, dental care, veterinary care, living environment and household smoke exposure. Also the size/lifespan relationship — including the fact that it is **not monotonic**: small dogs slightly outlive toy dogs.
+
+**Neuter timing, done honestly.** Neutered dogs outlive intact ones, so it earns a bonus — but Hart et al. (2020) found that in a number of larger breeds, neutering before the growth plates close raises joint-disorder and some cancer risk. So the neuter factor is timing-aware: a big dog neutered before a year keeps only part of the bonus. Two honesty caveats, both spelled out in the methodology: Hart reported disorder *rates*, not lifespan *years* (so the translation is our own low-confidence derivation, kept a single net-positive factor rather than double-counted as a bonus plus a penalty); and Hart's effect is *breed-specific*, so applying it to all large breeds by size is a deliberate simplification — defensible because the mechanism scales with size, but a reason the figure stays low-confidence and small. Small breeds, where the evidence shows no such effect, are left alone.
+
+**Breed health, made robust.** Every recognised breed gets a health panel that goes well past a list of terms. A catalogue of ~66 well-established conditions — referenced to the Merck Veterinary Manual and the veterinary specialty colleges — enriches each breed's documented predispositions with the signs to watch for, how urgent each is, and what genuinely helps. It is then **personalised to the dog**: concerns are prioritised for the current life stage (developmental problems for a puppy, cancers and cognitive change for a senior, emergencies like bloat at any age), grouped by body system, and cross-referenced against the profile — feeding guidance for a deep-chested breed, airway and heat guidance for a flat face, an anaesthetic-sensitivity flag for sighthounds. It enriches the breed data; it never invents a predisposition, and it is framed as what to raise with a vet, not a diagnosis.
 
 Two things it deliberately does *not* model, and the reasons are the interesting part.
 
 **Brachycephaly.** Flat-faced breeds sit about 1.9 years below the rest of the dataset already, because their breed lifespan figures are observed lifespans and the airway is priced into them. Subtracting a published skull-shape effect on top would charge a Pug twice for one nose. It reaches the answer through the breed's own baseline instead, and shows up as care guidance rather than arithmetic.
 
-**Mixed ancestry.** "Mutts are healthier" is the most confidently repeated claim in dog folklore, and the two largest datasets disagree about its sign: Montoya (n = 13.3M) puts mixed breeds at 12.71 years against 12.69 for all dogs — a tie — while McMillan (n = 584,734) has crossbreeds *shorter*-lived at 12.0 against 12.7. Two large studies pointing opposite ways is a reason to model nothing, not a reason to average them into a number.
+**Mixed ancestry — the *bonus*, not the *composition*.** "Mutts are healthier" is the most confidently repeated claim in dog folklore, and the two largest datasets disagree about its sign: Montoya (n = 13.3M) puts mixed breeds at 12.71 years against 12.69 for all dogs — a tie — while McMillan (n = 584,734) has crossbreeds *shorter*-lived at 12.0 against 12.7. Two large studies pointing opposite ways is a reason to model no crossbreed bonus or penalty, not a reason to average them into a number. What the app *does* do is let you enter a known mix — up to three breeds with percentages — and blends their observed size and lifespan baselines and pools their health risks. That uses the composition you supplied; it adds no mutt bonus on top. The two questions are kept separate.
 
 Each factor carries an evidence rating, and the app shows it. A finding from 584,734 dogs and a finding confounded by reverse causation should not look alike, and here they don't.
 
@@ -71,9 +75,12 @@ result.lifespan.expectedYears     // 10.5
 result.lifespan.rawDeltaYears     // -1.98  (what the factors sum to)
 result.lifespan.appliedDeltaYears // -1.74  (what saturation allowed through)
 result.recommendations[0]         // { title: 'Get to an ideal body condition', potentialYears: 0.91, … }
+result.breedHealth?.priorityNow   // the concerns to watch for at this dog's age, most urgent first
 ```
 
 Recommendations are not a lookup table. Each one re-runs the whole lifespan model with that single change applied and reports the difference — so the years quoted already account for saturation and for overlap with everything else the dog has going on.
+
+The health report is likewise personalised. `breedHealth.priorityNow` reflects the dog's life stage, `breedHealth.bySystem` groups every documented concern by body system, and `breedHealth.callouts` are the profile-specific cross-references (bloat feeding, flat-faced airway care, and so on). Pass `neuterAgeMonths` to make the neuter factor timing-aware for large breeds.
 
 ## Development
 
@@ -85,7 +92,7 @@ npm run typecheck
 npm run build
 ```
 
-The test suite covers the models against their published tables, dataset invariants across all 247 breeds, saturation behaviour, life-stage boundary monotonicity, and a fuzz pass over every breed at five ages.
+The test suite covers the models against their published tables, dataset invariants across all 247 breeds, saturation behaviour, life-stage boundary monotonicity, neuter-timing behaviour, the condition catalogue's integrity and match rate, life-stage-aware health prioritisation, and a fuzz pass over every breed at five ages.
 
 ## Where the numbers come from
 
@@ -97,6 +104,8 @@ Every constant is traceable, and [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md) li
 - **Wang et al. (2020)** — the DNA-methylation clock
 - **AAHA Canine Life Stage Guidelines** — the proportional stage definitions
 - **Glickman et al. (2011)** — periodontal disease and kidney disease, n = 164,706
+- **Hart et al. (2020)** — age of neutering and joint/cancer risk across 35 breeds, behind the timing-aware neuter factor
+- **Merck Veterinary Manual** and the veterinary specialty colleges (ACVS, ACVO, ACVIM) — the clinical reference behind the breed-health condition catalogue
 
 **McMillan et al. (2024)** (n = 584,734) is cited throughout but no number is taken from it. It is the evidence for the two modifiers deliberately left out — skull shape and mixed ancestry — and it earns its place by ruling things out rather than by contributing a constant.
 

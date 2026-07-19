@@ -119,18 +119,10 @@ export function buildRecommendations(
   results.sort((a, b) => b.potentialYears - a.potentialYears)
 
   // Advice that isn't a lifespan lever but still changes what an owner should
-  // do today. These carry no years figure because inventing one would be dishonest.
-  if (breed?.brachycephalic) {
-    results.push({
-      id: 'brachycephalic-care',
-      title: 'Manage the flat face carefully',
-      detail:
-        'Walk in the cool part of the day, use a harness rather than a collar, and never leave them anywhere warm. Loud breathing, snoring and tiring quickly are not just breed character — they are signs of airway obstruction worth raising with a vet.',
-      potentialYears: 0,
-      priority: 'medium',
-    })
-  }
-
+  // do today. These carry no years figure because inventing one would be
+  // dishonest. Brachycephalic airway care used to live here too, but it now has
+  // a fuller home in the breed-health panel (a callout plus the BOAS entry's own
+  // signs and management), so repeating it here would just say it twice.
   if (stage === 'senior' || stage === 'geriatric') {
     results.push({
       id: 'senior-screening',
