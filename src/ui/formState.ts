@@ -25,6 +25,10 @@ export interface FormState {
   ageUnit: 'years' | 'months'
   birthDate: string
   breedName: string
+  /** When true, the breed picker becomes a mix of up to three breeds. */
+  isMixed: boolean
+  /** Component breeds and their percentages, held as strings while typing. */
+  mix: readonly { breedName: string; percent: string }[]
   weight: string
   weightUnit: WeightUnit
   // These carry `| undefined` explicitly: under exactOptionalPropertyTypes,
@@ -66,9 +70,17 @@ export const DEFAULT_STATE: FormState = {
   ageUnit: 'years',
   birthDate: '',
   breedName: '',
+  isMixed: false,
+  mix: [
+    { breedName: '', percent: '' },
+    { breedName: '', percent: '' },
+  ],
   weight: '',
-  weightUnit: 'kg',
+  weightUnit: 'lb',
 }
+
+/** The most breeds a single mix can name. */
+export const MAX_MIX_BREEDS = 3
 
 function resolveAgeYears(state: FormState, now: Date): number | null {
   if (state.ageMode === 'birthdate') {
@@ -85,6 +97,35 @@ function resolveAgeYears(state: FormState, now: Date): number | null {
   return state.ageUnit === 'months' ? raw / 12 : raw
 }
 
+/**
+ * The breed part of the profile: a mix composition when the box is ticked and at
+ * least one component breed is named, otherwise the single breed name.
+ *
+ * Percentages are used as entered. If none are filled the components split
+ * evenly; if some are filled, the blanks drop out (the engine normalises what
+ * remains). This keeps a half-finished form from guessing wildly.
+ */
+function breedFields(state: FormState): Pick<DogProfile, 'breedName' | 'breedComposition'> {
+  if (state.isMixed) {
+    const named = state.mix.filter((m) => m.breedName.trim() !== '')
+    if (named.length === 0) return {}
+
+    const parsed = named.map((m) => ({ name: m.breedName.trim(), pct: Number.parseFloat(m.percent) }))
+    const anyPct = parsed.some((p) => Number.isFinite(p.pct) && p.pct > 0)
+
+    const composition = parsed
+      .map((p) => ({
+        breedName: p.name,
+        fraction: anyPct ? (Number.isFinite(p.pct) && p.pct > 0 ? p.pct : 0) : 1,
+      }))
+      .filter((c) => c.fraction > 0)
+
+    return composition.length > 0 ? { breedComposition: composition } : {}
+  }
+
+  return state.breedName.trim() ? { breedName: state.breedName.trim() } : {}
+}
+
 /** Returns null when there isn't enough entered yet to calculate anything. */
 export function toProfile(state: FormState, now: Date): DogProfile | null {
   const ageYears = resolveAgeYears(state, now)
@@ -98,7 +139,7 @@ export function toProfile(state: FormState, now: Date): DogProfile | null {
   return {
     ageYears,
     ...(state.name.trim() ? { name: state.name.trim() } : {}),
-    ...(state.breedName.trim() ? { breedName: state.breedName.trim() } : {}),
+    ...breedFields(state),
     ...(hasWeight ? { weightKg: toKilograms(weightValue, state.weightUnit) } : {}),
     ...(state.sex ? { sex: state.sex } : {}),
     ...(state.neuterStatus ? { neuterStatus: state.neuterStatus } : {}),
@@ -122,7 +163,9 @@ export function toProfile(state: FormState, now: Date): DogProfile | null {
 /** How much of the optional detail has been filled in, for the progress hint. */
 export function completeness(state: FormState): { filled: number; total: number } {
   const optional = [
-    state.breedName.trim() !== '',
+    state.isMixed
+      ? state.mix.some((m) => m.breedName.trim() !== '')
+      : state.breedName.trim() !== '',
     state.weight.trim() !== '',
     state.sex !== undefined,
     state.neuterStatus !== undefined,

@@ -5,6 +5,10 @@ import type { Breed } from '../../core'
 interface Props {
   value: string
   onChange: (breedName: string) => void
+  /** Field label. Defaults to "Breed"; a mix uses "Breed 1", "Breed 2", … */
+  label?: string
+  /** Whether to show the 247-breeds helper line. Off for repeated mix rows. */
+  showHelp?: boolean
 }
 
 /**
@@ -15,7 +19,7 @@ interface Props {
  * transitive ones for a filtered list. Keyboard support is the part people
  * actually skip, so it is here — arrows to move, Enter to pick, Escape to close.
  */
-export function BreedCombobox({ value, onChange }: Props) {
+export function BreedCombobox({ value, onChange, label = 'Breed', showHelp = true }: Props) {
   const [query, setQuery] = useState(value)
   const [open, setOpen] = useState(false)
   const [activeIndex, setActiveIndex] = useState(0)
@@ -117,7 +121,7 @@ export function BreedCombobox({ value, onChange }: Props) {
   return (
     <div className="field">
       <label className="field__label" htmlFor={`${listId}-input`}>
-        Breed
+        {label}
       </label>
       <div className="combobox" ref={containerRef}>
         <input
@@ -180,9 +184,11 @@ export function BreedCombobox({ value, onChange }: Props) {
           </ul>
         ) : null}
       </div>
-      <p className="field__help">
-        247 breeds, with population lifespan data for each. Common nicknames work too.
-      </p>
+      {showHelp ? (
+        <p className="field__help">
+          247 breeds, with population lifespan data for each. Common nicknames work too.
+        </p>
+      ) : null}
     </div>
   )
 }
