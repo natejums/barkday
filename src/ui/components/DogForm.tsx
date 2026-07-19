@@ -1,6 +1,14 @@
-import type { FormPatch, FormState } from '../formState'
+import { fromKilograms } from '../../core'
+import type { Breed, WeightUnit } from '../../core'
+import { MAX_MIX_BREEDS, type FormPatch, type FormState } from '../formState'
 import { BreedCombobox } from './BreedCombobox'
 import { SegmentedControl } from './SegmentedControl'
+
+/** A breed's typical weight range in the unit the form is using, e.g. "55–80 lb". */
+function weightRangeLabel(range: readonly [number, number], unit: WeightUnit): string {
+  const round = (v: number) => (unit === 'kg' ? Math.round(v * 10) / 10 : Math.round(v))
+  return `${round(fromKilograms(range[0], unit))}–${round(fromKilograms(range[1], unit))} ${unit}`
+}
 
 /** WSAVA 9-point body condition scale, in language an owner can actually apply. */
 const BCS_DESCRIPTIONS: Record<number, string> = {
@@ -18,9 +26,25 @@ const BCS_DESCRIPTIONS: Record<number, string> = {
 interface Props {
   state: FormState
   onChange: (patch: FormPatch) => void
+  /** The resolved breed (single or blended mix), used only for the weight hint. */
+  hintBreed?: Breed | undefined
 }
 
-export function DogForm({ state, onChange }: Props) {
+export function DogForm({ state, onChange, hintBreed }: Props) {
+  function updateMixRow(index: number, patch: Partial<FormState['mix'][number]>) {
+    onChange({ mix: state.mix.map((row, i) => (i === index ? { ...row, ...patch } : row)) })
+  }
+
+  function addMixRow() {
+    if (state.mix.length >= MAX_MIX_BREEDS) return
+    onChange({ mix: [...state.mix, { breedName: '', percent: '' }] })
+  }
+
+  function removeMixRow(index: number) {
+    if (state.mix.length <= 1) return
+    onChange({ mix: state.mix.filter((_, i) => i !== index) })
+  }
+
   return (
     <form className="card" onSubmit={(event) => event.preventDefault()}>
       <div className="form__section">
@@ -106,7 +130,72 @@ export function DogForm({ state, onChange }: Props) {
           </div>
         )}
 
-        <BreedCombobox value={state.breedName} onChange={(breedName) => onChange({ breedName })} />
+        <div className="field">
+          <label className="checkbox-row">
+            <input
+              type="checkbox"
+              checked={state.isMixed}
+              onChange={(event) => onChange({ isMixed: event.target.checked })}
+            />
+            <span>Mixed breed (I know roughly what's in the mix)</span>
+          </label>
+        </div>
+
+        {state.isMixed ? (
+          <div className="field">
+            {state.mix.map((row, index) => (
+              <div className="mix-row" key={index}>
+                <div className="mix-row__breed">
+                  <BreedCombobox
+                    label={`Breed ${index + 1}`}
+                    showHelp={false}
+                    value={row.breedName}
+                    onChange={(breedName) => updateMixRow(index, { breedName })}
+                  />
+                </div>
+                <div className="mix-row__pct field">
+                  <label className="field__label" htmlFor={`mix-pct-${index}`}>
+                    %
+                  </label>
+                  <input
+                    id={`mix-pct-${index}`}
+                    className="input"
+                    type="number"
+                    min={0}
+                    max={100}
+                    placeholder="—"
+                    aria-label={`Breed ${index + 1} percentage`}
+                    value={row.percent}
+                    onChange={(event) => updateMixRow(index, { percent: event.target.value })}
+                  />
+                </div>
+                {state.mix.length > 1 ? (
+                  <button
+                    type="button"
+                    className="mix-row__remove"
+                    aria-label={`Remove breed ${index + 1}`}
+                    onClick={() => removeMixRow(index)}
+                  >
+                    ×
+                  </button>
+                ) : null}
+              </div>
+            ))}
+
+            {state.mix.length < MAX_MIX_BREEDS ? (
+              <button type="button" className="link-button" onClick={addMixRow}>
+                + Add another breed
+              </button>
+            ) : null}
+
+            <p className="field__help">
+              Up to three breeds. Percentages are optional — leave them blank for an even split, and
+              they don't need to add up to exactly 100.
+            </p>
+          </div>
+        ) : (
+          <BreedCombobox value={state.breedName} onChange={(breedName) => onChange({ breedName })} />
+        )}
 
         <div className="field">
           <label className="field__label" htmlFor="dog-weight">
@@ -131,10 +220,16 @@ export function DogForm({ state, onChange }: Props) {
                 onChange({ weightUnit: event.target.value as FormState['weightUnit'] })
               }
             >
-              <option value="kg">kg</option>
               <option value="lb">lb</option>
+              <option value="kg">kg</option>
             </select>
           </div>
+          {hintBreed ? (
+            <p className="field__help">
+              {state.isMixed ? 'Typical for this mix' : `Typical for a ${hintBreed.name}`}:{' '}
+              <strong>{weightRangeLabel(hintBreed.weightKg, state.weightUnit)}</strong>.
+            </p>
+          ) : null}
           <p className="field__help">
             Used for sizing when the breed is unknown. With a breed set, the breed standard
             decides the size class so an overweight dog isn't counted twice.
@@ -183,8 +278,14 @@ export function DogForm({ state, onChange }: Props) {
         <p className="form__legend">Body condition</p>
         <div className="field">
           <span className="field__label" id="bcs-label">
-            Body condition score
+            Body condition score{' '}
+            <span className="field__help" style={{ display: 'inline' }}>(optional)</span>
           </span>
+          <p className="field__help" style={{ marginTop: 0, marginBottom: 8 }}>
+            Feel along the ribs and look for a waist from above, then tap the number that fits — 1 is
+            skin and bone, 9 is very overweight. Most healthy dogs are a <strong>4 or 5</strong>.
+            It's the single biggest lever here.
+          </p>
           <div className="segmented" role="group" aria-labelledby="bcs-label">
             {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((score) => (
               <button
@@ -192,8 +293,9 @@ export function DogForm({ state, onChange }: Props) {
                 type="button"
                 className="segmented__option"
                 style={{ flex: '1 1 0', padding: '7px 0' }}
+                data-ideal={score === 4 || score === 5}
                 aria-pressed={state.bodyConditionScore === score}
-                aria-label={`Body condition ${score} of 9`}
+                aria-label={`Body condition ${score} of 9${score === 4 || score === 5 ? ', ideal' : ''}`}
                 onClick={() =>
                   onChange({
                     bodyConditionScore: state.bodyConditionScore === score ? undefined : score,
@@ -204,10 +306,15 @@ export function DogForm({ state, onChange }: Props) {
               </button>
             ))}
           </div>
+          <div className="scale-anchors" aria-hidden="true">
+            <span>1 · too thin</span>
+            <span>4–5 · ideal</span>
+            <span>9 · overweight</span>
+          </div>
           <p className="field__help">
             {state.bodyConditionScore
               ? BCS_DESCRIPTIONS[state.bodyConditionScore]
-              : 'Run your hands along their ribs. 4–5 is ideal — this is the single biggest lever you have.'}
+              : 'Tap a number to see what it means, or leave it blank to skip.'}
           </p>
         </div>
       </div>

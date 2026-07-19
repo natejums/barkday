@@ -57,6 +57,14 @@ export interface DogProfile {
   ageYears: number
   /** Canonical breed name or a known alias. Omit for unknown/mixed. */
   breedName?: string
+  /**
+   * For a known mix: the component breeds and their fractions. Fractions need
+   * not sum to 1 — they are normalised. Takes precedence over `breedName`. The
+   * engine blends the components' size and lifespan by fraction and pools their
+   * health risks; it does not add any mixed-breed longevity bonus or penalty,
+   * because the evidence for one points both ways.
+   */
+  breedComposition?: readonly { breedName: string; fraction: number }[]
   /** Current weight in kg. Refines size class when the breed is unknown. */
   weightKg?: number
   sex?: Sex

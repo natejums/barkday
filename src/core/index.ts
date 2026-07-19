@@ -10,6 +10,7 @@ export { calculateDogAge, calculateFromBirthDate, isSupportedAge, MAX_SUPPORTED_
 export {
   BREEDS,
   BREED_GROUPS,
+  blendBreeds,
   breedsInGroup,
   findBreed,
   popularBreeds,

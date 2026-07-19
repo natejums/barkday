@@ -124,6 +124,16 @@ Only the third points the way folklore does, and it is an ecological correlation
 
 An earlier version of this model shipped a +0.3 year bonus here. That was fifteen times the effect its own cited source reported, and the opposite sign to a study cited a few lines away in the same file. Two large datasets pointing in opposite directions is a reason to model nothing, not a reason to average them into a number.
 
+**What *is* modelled is composition, which is a different question.** When an owner
+knows their dog is, say, 60% Labrador and 40% Poodle, the engine blends the two
+breeds' observed size and lifespan baselines by those percentages and pools their
+documented health risks. That is not the mutt bonus above — it adds no
+heterozygosity credit and no crossbreed penalty, and a 50/50 cross with no
+lifestyle factors lands exactly on the blended baseline. It only uses the
+composition the owner supplied to produce a better starting point than a generic
+size-band average. Where the *bonus* question has no honest answer, the
+*composition* question does, and the two are kept strictly separate.
+
 ### On brachycephaly, which is deliberately absent
 
 McMillan et al. (2024) is a strong result — brachycephalic breeds have a median lifespan of 11.2 years against 12.8 for mesocephalic ones, across 584,734 dogs. An earlier version of this model applied it as a −1.6 year modifier. That was wrong, and the reason is the same one this whole section is about.

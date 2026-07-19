@@ -74,7 +74,7 @@ export function App() {
 
       <div className="layout">
         <div className="layout__form">
-          <DogForm state={state} onChange={update} />
+          <DogForm state={state} onChange={update} hintBreed={result?.breed} />
         </div>
 
         <div className="results">

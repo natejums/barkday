@@ -35,6 +35,16 @@ every number is traceable and nothing overlapping gets counted twice.
     guidance for a deep-chested bloat-prone breed, airway and heat guidance for a
     flat face, an anaesthetic-sensitivity flag for sighthounds, and joint
     monitoring for a large breed neutered early.
+- **Known mixed breeds.** A "mixed breed" checkbox lets you enter up to three
+  component breeds with percentages. The engine blends their observed size and
+  lifespan baselines by fraction and pools their documented health risks into one
+  report — using the composition you supplied, with *no* mutt bonus or crossbreed
+  penalty added (the "mutts are healthier" claim has no honest answer; blending a
+  known composition is a separate question that does). New
+  `DogProfile.breedComposition` input and `blendBreeds` engine export.
+- **Ideal-weight hint.** As you enter a weight, the form shows the typical range
+  for the selected breed (or the blended range for a mix), so the number has a
+  reference point.
 - New engine exports: `buildBreedHealth`, `matchCondition`, `CONDITION_CATALOG`,
   and the supporting types (`BreedHealthReport`, `HealthConcern`, `ConditionInfo`,
   `HealthCallout`, `BodySystem`, `ConditionSeverity`, `OnsetStage`).
@@ -46,8 +56,14 @@ every number is traceable and nothing overlapping gets counted twice.
   severity indicators, expandable per-condition detail, and life-stage priorities
   — accessible in both light and dark themes, severity conveyed by label and shape
   rather than colour alone.
+- **Body condition score** is now self-explanatory: an up-front instruction on how
+  to assess it, the 4–5 ideal target marked on the control, and "too thin / ideal
+  / overweight" anchors under the scale.
+- **Weight defaults to pounds.**
 - Documentation: `docs/METHODOLOGY.md` gains sections on neuter timing and the
-  breed-health system; the README describes both.
+  breed-health system, and clarifies that a *known mix's composition* is blended
+  even though the crossbreed *bonus* is still deliberately not modelled; the
+  README describes all of it.
 
 ### Tested
 

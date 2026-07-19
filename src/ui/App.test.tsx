@@ -89,6 +89,53 @@ describe('App', () => {
     expect(within(panel).getByText(/by body system/i)).toBeInTheDocument()
   })
 
+  it('defaults the weight unit to pounds', () => {
+    render(<App />)
+    const unit = screen.getByRole('combobox', { name: /weight unit/i }) as HTMLSelectElement
+    expect(unit.value).toBe('lb')
+  })
+
+  it('spells out how to read the body condition score', () => {
+    render(<App />)
+    // The instruction and the ideal target are both present up front.
+    expect(screen.getByText(/feel along the ribs/i)).toBeInTheDocument()
+    expect(screen.getByText(/4–5 · ideal/i)).toBeInTheDocument()
+    const ideal = screen.getByRole('button', { name: /body condition 5 of 9, ideal/i })
+    expect(ideal).toBeInTheDocument()
+  })
+
+  it('turns the breed picker into a mix when the box is ticked', () => {
+    render(<App />)
+
+    // Single breed picker to start; no numbered breed rows.
+    expect(screen.getByRole('combobox', { name: /^breed$/i })).toBeInTheDocument()
+    expect(screen.queryByRole('combobox', { name: /breed 1/i })).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('checkbox', { name: /mixed breed/i }))
+
+    // Two component rows appear, each its own breed picker with a percentage.
+    expect(screen.getByRole('combobox', { name: /breed 1/i })).toBeInTheDocument()
+    expect(screen.getByRole('combobox', { name: /breed 2/i })).toBeInTheDocument()
+    expect(screen.getByRole('spinbutton', { name: /breed 1 percentage/i })).toBeInTheDocument()
+  })
+
+  it('shows a blended health panel for a known mix', () => {
+    render(<App />)
+    fireEvent.click(screen.getByRole('checkbox', { name: /mixed breed/i }))
+
+    fireEvent.change(screen.getByRole('combobox', { name: /breed 1/i }), {
+      target: { value: 'Great Dane' },
+    })
+    fireEvent.change(screen.getByRole('combobox', { name: /breed 2/i }), {
+      target: { value: 'Poodle (Standard)' },
+    })
+
+    // The health panel names the blend and still surfaces the Dane's bloat callout.
+    const panel = screen.getByRole('region', { name: /health to watch/i })
+    expect(within(panel).getByText(/great dane/i)).toBeInTheDocument()
+    expect(within(panel).getByText(/guard against bloat/i)).toBeInTheDocument()
+  })
+
   it('reveals the neuter-timing question only after a dog is marked neutered', () => {
     render(<App />)
 

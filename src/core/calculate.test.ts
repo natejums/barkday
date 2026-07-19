@@ -287,6 +287,58 @@ describe('calculateDogAge — breed health', () => {
   })
 })
 
+describe('calculateDogAge — mixed breeds', () => {
+  it('blends a known mix into a single breed and reports on it', () => {
+    const result = calculateDogAge({
+      ageYears: 5,
+      breedComposition: [
+        { breedName: 'Great Dane', fraction: 50 },
+        { breedName: 'Poodle (Standard)', fraction: 50 },
+      ],
+    })
+    expect(result.breed?.name).toMatch(/great dane/i)
+    expect(result.breed?.name).toMatch(/poodle/i)
+    expect(result.breedHealth).toBeDefined()
+    // Its expected lifespan sits between the two parents' baselines.
+    const dane = calculateDogAge({ ageYears: 5, breedName: 'Great Dane' })
+    const poodle = calculateDogAge({ ageYears: 5, breedName: 'Poodle (Standard)' })
+    expect(result.lifespan.baselineYears).toBeGreaterThan(dane.lifespan.baselineYears)
+    expect(result.lifespan.baselineYears).toBeLessThan(poodle.lifespan.baselineYears)
+  })
+
+  it('lets the composition take precedence over a stray breed name', () => {
+    const result = calculateDogAge({
+      ageYears: 5,
+      breedName: 'Chihuahua',
+      breedComposition: [{ breedName: 'Labrador Retriever', fraction: 100 }],
+    })
+    expect(result.breed?.name).toBe('Labrador Retriever')
+  })
+
+  it('warns and falls back when no breed in the mix is recognised', () => {
+    const result = calculateDogAge({
+      ageYears: 5,
+      breedComposition: [{ breedName: 'Direwolf', fraction: 60 }, { breedName: 'Nessie', fraction: 40 }],
+    })
+    expect(result.breed).toBeUndefined()
+    expect(result.breedHealth).toBeUndefined()
+    expect(result.warnings.join(' ')).toMatch(/none of the breeds in the mix/i)
+  })
+
+  it('applies no mixed-breed bonus — the blend is baseline only', () => {
+    // A 50/50 of two breeds with no lifestyle factors should land exactly on the
+    // blended baseline, with no crossbreed credit added on top.
+    const result = calculateDogAge({
+      ageYears: 5,
+      breedComposition: [
+        { breedName: 'Beagle', fraction: 50 },
+        { breedName: 'Border Collie', fraction: 50 },
+      ],
+    })
+    expect(result.lifespan.expectedYears).toBe(result.lifespan.baselineYears)
+  })
+})
+
 describe('the worked example in the README', () => {
   // Pinned so the documented output can't quietly drift away from the code.
   it('still produces the numbers the README quotes', () => {
