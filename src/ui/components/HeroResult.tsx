@@ -87,14 +87,14 @@ export function HeroResult({ result }: Props) {
         </div>
 
         <div className="tile">
-          <p className="tile__label">Time likely remaining</p>
+          <p className="tile__label">Time likely ahead</p>
           <p className="tile__value">
-            {remaining.years > 0 ? remaining.label : 'Living on borrowed time'}
+            {remaining.years > 0 ? remaining.label : 'Every day a gift'}
           </p>
           <p className="tile__detail">
             {remaining.years > 0
-              ? `Range ${remaining.rangeYears[0]}–${remaining.rangeYears[1]} yrs`
-              : 'Already past the estimate — plenty of dogs are'}
+              ? `Around ${remaining.rangeYears[0]}–${remaining.rangeYears[1]} more years together`
+              : 'Already past the average — and so many happy dogs are'}
           </p>
         </div>
       </div>

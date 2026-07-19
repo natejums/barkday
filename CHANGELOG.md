@@ -4,10 +4,20 @@ All notable changes to Barkday are recorded here. Dates are ISO 8601.
 
 ## [0.3.0] — 2026-07-19
 
-Polish and helpfulness, without adding weight to the form.
+Polish, warmth and helpfulness, without adding weight to the form.
 
 ### Added
 
+- **A warm, personal note.** Right under the number, the results now open with
+  "A note about {name}" — a short, personalised message framed around making the
+  most of the time you have together, not counting down. It reads the dog's life
+  stage, health and profile and speaks to it kindly and specifically, with
+  "ways to make the most of this stage together" (from first-adventures-and-photos
+  for a puppy to comfort, presence and small joys for a geriatric dog — including
+  touches drawn from the breed's own health notes). It is composed **entirely in
+  the browser** from the structured result — nothing is sent anywhere, nothing is
+  invented — so it stays private, free and honest. New `composeDogReport` export.
+  The "time remaining" tile is reframed as "time likely ahead", gently.
 - **Helpful gear suggestions.** A new "Gear that tends to help" section suggests
   generic product *categories* tied to what the model actually found for this dog
   — a kitchen scale and weight-management food for an overweight dog, a Y-front

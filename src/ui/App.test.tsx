@@ -96,6 +96,19 @@ describe('App', () => {
     expect(screen.getByRole('option', { name: 'lbs' })).toBeInTheDocument()
   })
 
+  it('opens with a warm, personal note framed around the time together', () => {
+    render(<App />)
+    const note = screen.getByRole('region', { name: /a note about your dog/i })
+    expect(within(note).getByText(/isn't a countdown/i)).toBeInTheDocument()
+    expect(within(note).getByText(/make the most of this stage together/i)).toBeInTheDocument()
+  })
+
+  it('addresses the dog by name in the note once a name is given', () => {
+    render(<App />)
+    fireEvent.change(screen.getByLabelText(/name/i), { target: { value: 'Jesse' } })
+    expect(screen.getByRole('region', { name: /a note about jesse/i })).toBeInTheDocument()
+  })
+
   it('keeps the default form short by folding the detailed questions away', () => {
     render(<App />)
     // The advanced disclosure exists…

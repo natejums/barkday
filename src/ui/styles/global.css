@@ -987,6 +987,45 @@ select {
   line-height: 1.5;
 }
 
+/* --------------------------------------------------------------- the report */
+
+/* A gentle accent edge marks this card as the personal one, without adding a
+   new colour to a deliberately restrained palette. */
+.report {
+  border-left: 3px solid var(--accent);
+}
+
+.report__body {
+  display: grid;
+  gap: 12px;
+}
+
+.report__para {
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--text-secondary);
+  max-width: 68ch;
+}
+
+.report__para:first-child {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.report__ideas-title {
+  margin-top: 20px;
+  margin-bottom: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.report__ideas {
+  max-width: 70ch;
+}
+
 /* ------------------------------------------------------------- breed health */
 
 /*
