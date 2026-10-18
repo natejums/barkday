@@ -2,6 +2,63 @@
 
 All notable changes to Barkday are recorded here. Dates are ISO 8601.
 
+## [2.0.0] — 2026-10-18
+
+Barkday 2.0: a second, in-depth version of the calculator alongside the first,
+and the whole thing branded for what it is — the world's best dog age calculator.
+The classic calculator is unchanged and preserved on the `baseline` branch.
+
+### Added
+
+- **A 2.0 tab.** Reachable from the masthead or directly at `#2.0`. Same
+  two-column layout, same essentials up front, and the in-depth questions
+  folded into groups by subject: their story (origin, age when they joined
+  you, when they came home), food and water (food type, grain-free or
+  legume-heavy, meals a day, treats, how they get their water, raised bowls),
+  daily life (what the exercise looks like, mental enrichment, sleep, time
+  alone), mind and company (fear, training approach, other dogs, children),
+  health and prevention (vaccines, parasites, microchip, weight trend,
+  mobility, known conditions, recent signs, supplements), home and safety
+  (climate, smoke, lawn chemicals, the car) and being ready (insurance or
+  savings, the emergency vet). Everything optional.
+- **An in-depth report**, assembled offline from a library of ~185
+  research-backed insights, each gated on the answers and each citing a real
+  source with its evidence strength shown: a warm opening note worded for
+  this dog; the top six proactive moves, ranked and priced in years where the
+  lifespan model can price them; what's going well; what to know now; a
+  twelve-month calendar; the detail by topic; questions for the next vet
+  visit; brand-free gear; the breed-health panel; the numbers, folded; and
+  the sources that report drew on. Phrasing varies deterministically between
+  dogs, so no two reports read alike and the same dog always gets the same
+  words. New `calculateDeep` and `composeDeepReport` engine exports, with a
+  `DeepProfile` that extends the 1.0 profile.
+- **A printable report.** One button lays the report out as a single-column
+  document; the browser's print dialog saves it as a PDF.
+- **One new lifespan factor — the only 2.0 question that moves the number.**
+  Marked fear or anxiety docks 0.5 years of expected lifespan, after Dreschel
+  (2010), owner-reported and retrospective, so low confidence; it is priced
+  as a recommendation like the other levers. Every other new question changes
+  the advice, not the arithmetic, and the methodology says so.
+- **A verified sources registry** (`src/core/v2/sources.ts`): ~60 references
+  behind the 2.0 advice, each with a full citation, and a URL only where it
+  could be verified. The type system refuses an insight that cites a key that
+  isn't there; a test refuses one that cites nothing.
+- The shared voice helper now conjugates properly ("has", "does", "carries")
+  and offers sentence-initial pronoun forms.
+
+### Changed
+
+- **Branding.** The masthead, page title and metadata now say what the thing
+  is: the world's best dog age calculator, in two versions.
+- The 1.0 form's essentials and body-condition blocks are exported as
+  components so 2.0 reuses them verbatim rather than copying them; the
+  classic form's markup is unchanged.
+
+### Baseline
+
+- The calculator exactly as it was before 2.0 is preserved as the `baseline`
+  branch at commit `f1928a3`. The README documents how to roll back to it.
+
 ## [0.3.0] — 2026-07-19
 
 Polish, warmth and helpfulness, without adding weight to the form.

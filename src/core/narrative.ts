@@ -28,7 +28,7 @@ export interface DogReport {
  * or a they. Subjects are almost always the dog's name (always singular), so the
  * only agreement that varies is the handful of `be`/`have`/`verb()` uses.
  */
-interface Voice {
+export interface Voice {
   /** Sentence-initial: "Jesse" or "Your dog". */
   Name: string
   /** Mid-sentence: "Jesse" or "your dog". */
@@ -36,6 +36,9 @@ interface Voice {
   subj: string
   obj: string
   poss: string
+  /** Sentence-initial forms: "She", "He", "They" and "Her", "His", "Their". */
+  Subj: string
+  Poss: string
   /**
    * Conjugate a regular verb for the *pronoun* subject: verb('want') → "wants"
    * for she/he, "want" for they. The dog's name is always a singular subject, so
@@ -44,7 +47,7 @@ interface Voice {
   verb: (base: string) => string
 }
 
-function voiceFor(name: string | undefined, sex: Sex | undefined): Voice {
+export function voiceFor(name: string | undefined, sex: Sex | undefined): Voice {
   const display = name?.trim()
   const female = sex === 'female'
   const male = sex === 'male'
@@ -55,8 +58,22 @@ function voiceFor(name: string | undefined, sex: Sex | undefined): Voice {
     subj: female ? 'she' : male ? 'he' : 'they',
     obj: female ? 'her' : male ? 'him' : 'them',
     poss: female ? 'her' : male ? 'his' : 'their',
-    verb: (base) => (plural ? base : `${base}s`),
+    Subj: female ? 'She' : male ? 'He' : 'They',
+    Poss: female ? 'Her' : male ? 'His' : 'Their',
+    verb: (base) => (plural ? base : thirdPerson(base)),
   }
+}
+
+/**
+ * Third-person singular of a regular English verb — "has", "does", "carries",
+ * "scratches" — rather than a bare "s" bolted on, which gave "haves" and "dos".
+ */
+export function thirdPerson(base: string): string {
+  if (base === 'have') return 'has'
+  if (base === 'be') return 'is'
+  if (/(s|x|z|ch|sh|o)$/.test(base)) return `${base}es`
+  if (/[^aeiou]y$/.test(base)) return `${base.slice(0, -1)}ies`
+  return `${base}s`
 }
 
 const STAGE_PREDICATE: Readonly<Record<LifeStageId, (v: Voice) => string>> = {
@@ -84,6 +101,8 @@ function warmImprovement(id: string, title: string, v: Voice): string {
       return `bring more of ${v.poss} life indoors with you`
     case 'smoke':
       return 'keep the air at home smoke-free'
+    case 'anxiety':
+      return `help ${v.obj} feel safer in the world`
     default:
       return title.toLowerCase()
   }

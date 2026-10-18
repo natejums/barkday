@@ -29,7 +29,8 @@ export { classifyLifeStage, lifeStageDefinition, stageBoundaries } from './lifeS
 export { buildRecommendations } from './recommendations'
 export { buildProductSuggestions } from './products'
 export { composeDogReport } from './narrative'
-export type { DogReport } from './narrative'
+export type { DogReport, Voice } from './narrative'
+export { voiceFor } from './narrative'
 
 export {
   buildBreedHealth,
@@ -70,8 +71,63 @@ export type { WeightUnit } from './units'
 
 export { ALL_DOGS_LIFE_EXPECTANCY, SIZE_BANDS } from './constants'
 
+// Barkday 2.0 — the in-depth report. Same engine underneath; far more questions on top.
+export {
+  buildCalendar,
+  buildContext,
+  CALENDAR_WHEN_LABELS,
+  calculateDeep,
+  composeDeepReport,
+  DEEP_QUESTION_KEYS,
+  DEEP_QUESTION_TOTAL,
+  INSIGHT_LIBRARY,
+  profileSignature,
+  SOURCE_IDS,
+  SOURCES,
+  TOPIC_LABELS,
+  TOPIC_ORDER,
+} from './v2'
+export type {
+  CalendarItem,
+  CalendarWhen,
+  CarTravel,
+  Climate,
+  DeepProfile,
+  DeepReport,
+  DeepResult,
+  DogOrigin,
+  Enrichment,
+  ExerciseType,
+  FoodType,
+  GrainFree,
+  InsightKind,
+  InsightSpec,
+  JoinedAt,
+  KnownCondition,
+  MealsPerDay,
+  MicrochipStatus,
+  Mobility,
+  ParasitePrevention,
+  Readiness,
+  RecentSign,
+  ReportInsight,
+  ReportSource,
+  SleepQuality,
+  SourceId,
+  Supplement,
+  TimeAlone,
+  Topic,
+  TopicGroup,
+  TrainingApproach,
+  TreatShare,
+  VaccinationStatus,
+  WaterSource,
+  WeightTrend,
+} from './v2'
+
 export type {
   ActivityLevel,
+  Anxiety,
   BodySystem,
   Breed,
   BreedHealthReport,

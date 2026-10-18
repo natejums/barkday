@@ -1,24 +1,24 @@
-import { useEffect, useMemo, useState } from 'react'
-import { calculateDogAge } from '../core'
-import { completeness, DEFAULT_STATE, toProfile, type FormPatch, type FormState } from './formState'
-import { DogForm } from './components/DogForm'
-import { DogReport } from './components/DogReport'
-import { FactorWaterfall } from './components/FactorWaterfall'
-import { BreedHealth, CareGuidance, HelpfulGear, Recommendations, Warnings } from './components/Guidance'
-import { HeroResult } from './components/HeroResult'
-import { ModelComparison } from './components/ModelComparison'
+import { useEffect, useState } from 'react'
+import { ClassicView } from './classic/ClassicView'
+import { DeepView } from './deep/DeepView'
 
 type Theme = 'system' | 'light' | 'dark'
+type Tab = 'classic' | 'deep'
 
 const REPO_URL = 'https://github.com/natejums/barkday'
 
-export function App() {
-  const [state, setState] = useState<FormState>(DEFAULT_STATE)
-  const [theme, setTheme] = useState<Theme>('system')
+/** The hashes that open the 2.0 tab. `#2.0` is the one we link to. */
+const DEEP_HASHES = new Set(['#2.0', '#2', '#v2', '#deep', '#/2.0'])
 
-  // One clock reading per session. Recomputing it on every render would make
-  // the dog imperceptibly older each keystroke and defeat memoisation.
-  const now = useMemo(() => new Date(), [])
+function tabFromHash(hash: string): Tab {
+  return DEEP_HASHES.has(hash.toLowerCase()) ? 'deep' : 'classic'
+}
+
+export function App() {
+  const [theme, setTheme] = useState<Theme>('system')
+  const [tab, setTab] = useState<Tab>(() =>
+    typeof window === 'undefined' ? 'classic' : tabFromHash(window.location.hash),
+  )
 
   useEffect(() => {
     const root = document.documentElement
@@ -26,15 +26,24 @@ export function App() {
     else root.setAttribute('data-theme', theme)
   }, [theme])
 
-  const result = useMemo(() => {
-    const profile = toProfile(state, now)
-    return profile ? calculateDogAge(profile) : null
-  }, [state, now])
+  // The tab lives in the URL hash, so 2.0 can be linked to and the back button works.
+  useEffect(() => {
+    function onHashChange() {
+      setTab(tabFromHash(window.location.hash))
+    }
+    window.addEventListener('hashchange', onHashChange)
+    return () => window.removeEventListener('hashchange', onHashChange)
+  }, [])
 
-  const progress = completeness(state)
-
-  function update(patch: FormPatch) {
-    setState((current) => ({ ...current, ...patch }))
+  function choose(next: Tab) {
+    setTab(next)
+    const hash = next === 'deep' ? '#2.0' : ''
+    if (typeof window !== 'undefined' && window.location.hash !== hash) {
+      // Replace rather than push for the classic tab, so clearing the hash doesn't
+      // leave a bare "#" in the address bar.
+      if (hash) window.location.hash = hash
+      else window.history.replaceState(null, '', window.location.pathname + window.location.search)
+    }
   }
 
   return (
@@ -59,8 +68,10 @@ export function App() {
             Barkday
           </h1>
           <p className="masthead__tagline">
-            A dog's age in human years depends on their size, their breed, their weight and how
-            they live — not on multiplying by seven. This works out the rest of it.
+            <strong>The world's best dog age calculator.</strong> A dog's age in human years depends
+            on their size, their breed, their weight and how they live — not on multiplying by
+            seven. Classic gives you the number and the reasons; 2.0 goes deeper, with a report
+            built around helping your dog live their best life.
           </p>
         </div>
 
@@ -73,50 +84,42 @@ export function App() {
         </button>
       </header>
 
-      <div className="layout">
-        <div className="layout__form">
-          <DogForm state={state} onChange={update} hintBreed={result?.breed} />
-        </div>
-
-        <div className="results">
-          {result === null ? (
-            <section className="card">
-              <h2 className="card__title">Tell me about your dog</h2>
-              <p className="card__subtitle">
-                An age is all that's strictly needed to start. Everything else sharpens the
-                estimate — and the more you add, the less this is guesswork.
-              </p>
-            </section>
-          ) : (
-            <>
-              <HeroResult result={result} />
-
-              <DogReport result={result} />
-
-              {progress.filled < progress.total ? (
-                <div className="notice">
-                  <span className="notice__icon" aria-hidden="true">
-                    ✎
-                  </span>
-                  <span>
-                    {progress.filled} of {progress.total} details filled in. Body condition and
-                    dental care move the number most — they're the two best-evidenced levers there
-                    are.
-                  </span>
-                </div>
-              ) : null}
-
-              <Warnings warnings={result.warnings} />
-              <FactorWaterfall lifespan={result.lifespan} breedKnown={result.breed !== undefined} />
-              <Recommendations result={result} detailsGiven={progress.filled} />
-              <HelpfulGear result={result} />
-              <ModelComparison models={result.models} />
-              <CareGuidance result={result} />
-              {result.breedHealth ? <BreedHealth result={result} /> : null}
-            </>
-          )}
-        </div>
+      <div className="tabs" role="tablist" aria-label="Calculator version">
+        <button
+          type="button"
+          role="tab"
+          id="tab-classic"
+          className="tab"
+          aria-selected={tab === 'classic'}
+          aria-controls="panel-classic"
+          onClick={() => choose('classic')}
+        >
+          Classic
+          <span className="tab__hint">The number, and why</span>
+        </button>
+        <button
+          type="button"
+          role="tab"
+          id="tab-deep"
+          className="tab"
+          aria-selected={tab === 'deep'}
+          aria-controls="panel-deep"
+          onClick={() => choose('deep')}
+        >
+          2.0 · In depth
+          <span className="tab__hint">A proactive, printable report</span>
+        </button>
       </div>
+
+      {tab === 'classic' ? (
+        <div role="tabpanel" id="panel-classic" aria-labelledby="tab-classic">
+          <ClassicView />
+        </div>
+      ) : (
+        <div role="tabpanel" id="panel-deep" aria-labelledby="tab-deep">
+          <DeepView />
+        </div>
+      )}
 
       <footer className="footer">
         <p>

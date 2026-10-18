@@ -1,8 +1,8 @@
 {
   "name": "barkday",
-  "version": "0.3.0",
+  "version": "2.0.0",
   "private": false,
-  "description": "An evidence-based dog age calculator that models size, breed, body condition and lifestyle — not just \"multiply by seven\".",
+  "description": "The world's best dog age calculator: evidence-based, modelling size, breed, body condition and lifestyle — plus a 2.0 in-depth, printable, research-backed report.",
   "license": "MIT",
   "type": "module",
   "keywords": [
