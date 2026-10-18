@@ -111,6 +111,7 @@ Baseline is the breed's population lifespan midpoint, or the size-class figure w
 | Diet | −0.6 (poor) → +0.7 (excellent) | Moderate | Purina; portion control is the lever |
 | Environment | +0.2 (indoor) → −0.4 (outdoor) | Low | Trauma, infection, temperature |
 | Household smoke | −0.3 yr | Low | Respiratory disease and some cancers |
+| Marked fear or anxiety *(2.0 input)* | −0.5 yr | Low | Dreschel 2010, n = 721, owner-reported; fires only at the top level |
 
 ### On mixed ancestry, which is also deliberately absent
 
@@ -271,6 +272,122 @@ Nothing here is a diagnosis or a prediction about the individual animal. It is
 the breed's documented predispositions, organised, prioritised for the dog's age,
 and cross-referenced against the profile — so an owner knows what to watch for
 and what to raise with a vet.
+
+## 8. Barkday 2.0: more questions, one more number
+
+2.0 asks roughly thirty questions the classic calculator does not. The rule for
+all of them was set before any was written: **a question may change the
+arithmetic only if there is a published lifespan effect to hang it on.** By
+that rule exactly one qualifies.
+
+### The one new modifier
+
+**Fear and anxiety.** Dreschel (2010) surveyed the owners of 721 dogs that had
+died and found that dogs with extreme stranger-directed fear lived about six
+months less than calm dogs, and that fearful and separation-anxious dogs had
+more skin disease. It is retrospective and owner-reported, which is why it
+ships at **low confidence**, fires only at the top level of the three-way
+question ("very" anxious — "somewhat" changes the guidance but not the number),
+and goes through the same saturation as every other modifier. It is also priced
+as a recommendation by the same diff-the-model method as the rest, so the
+report can say how much getting help is worth in years. The direction is
+plausible — chronic stress has physiological costs — and fear is, usefully, one
+of the most treatable things on the whole form.
+
+### Everything else changes the advice, not the number
+
+The honest reason is that the literature behind the other questions is about
+*risk* and *mechanism*, not years of life. Raised feeders are associated with
+more bloat in big dogs; legume-rich diets with reports of dilated
+cardiomyopathy; lawn herbicides with bladder cancer in Scottish Terriers;
+inactivity with cognitive dysfunction. Each of those is a reason to tell an
+owner to do something specific. None is a per-dog lifespan figure, and
+inventing one would be exactly the move this document spends its other seven
+sections refusing to make.
+
+So each 2.0 question feeds a library of about 185 *insights* — a move (something
+to do, ranked), a win (something already right), a flag (something to know
+now), a vet question, or a note — each gated on the answers, each with a stated
+evidence strength, and each citing at least one entry in a sources registry
+(`src/core/v2/sources.ts`) that the type system enforces and a test verifies.
+What each question changes:
+
+| Question | What it changes | Main sources |
+|---|---|---|
+| Origin and age when they joined you | History-gap guidance: baseline exam, heartworm and faecal tests, vaccine course if records are missing, microchip transfer; age-estimate caveat | AAHA vaccination guidelines; Lord 2009 |
+| Food type | Diet-specific notes and moves: home-cooked → nutritionist formulation (Stockman 2013); raw → contamination flag (van Bree 2018, AVMA); table food → complete diet | As listed |
+| Grain-free / legume-heavy | DCM flag, stronger for DCM-prone breeds or a heart diagnosis | FDA investigation; Freeman 2018 |
+| Meals a day | Free-fed → measured portions (Kealy 2002); one meal → split for bloat-prone breeds (Raghavan 2004), otherwise the Bray 2022 association, honestly caveated | As listed |
+| Treats | 10% rule | WSAVA; APOP |
+| Water source | Bowl hygiene (NSF 2011); leptospirosis and blue-green algae for outdoor sources (AAHA 2024 lepto-core update) | As listed |
+| Raised bowls | Floor feeding for large breeds | Glickman 2000; Pipan 2012 |
+| Exercise types | Recall as a safety device (Boyd 2018); fetch and joints; swimming and ears (O'Neill 2021); sports injuries (Levy 2009); heat on hikes (Hall 2020) | As listed |
+| Enrichment, sleep | Enrichment and the ageing brain (Milgram 2005); night restlessness as a cognitive-dysfunction sign (Salvin 2010) | As listed |
+| Time alone, other dogs, children | Social determinants of health (McCoy 2023); separation distress (Dreschel 2010) | As listed |
+| Training approach | Aversive methods and welfare (Vieira de Castro 2020); behaviour as a cause of death under three (Boyd 2018) | As listed |
+| Vaccines, parasites, microchip | Core vaccines incl. leptospirosis; year-round heartworm prevention; return-to-owner rates and stale registrations | AAHA; AHS; Lord 2009 |
+| Known conditions | Management notes and vet questions per condition — renal diet (Jacob 2002), arthritis (Marshall 2010, Roush 2010, Vandeweerd 2012), heart (ACVIM 2019), seizures (ACVIM 2016) — never a diagnosis | As listed |
+| Recent signs | A flag or a vet question per sign; urgency by the dog (an unspayed female drinking more, a cough in a cardiac breed) | Merck; others as listed |
+| Weight trend, mobility | Early weight creep; unexplained loss as a symptom; stiffness as arthritis and what helps | Salt 2019; Marshall 2010 |
+| Climate | Heat: triggers and risk factors (Hall 2020 ×2); cold: salts, antifreeze, coats | As listed |
+| Lawn chemicals | Bladder cancer and lymphoma signals | Glickman 2004; Takashima-Uebelhoer 2012 |
+| Car travel | Restraint | AVMA (consensus, no outcome study — rated low) |
+| Supplements | Omega-3 has evidence; most joint supplements don't; multivitamins redundant on complete diets | Roush 2010; Vandeweerd 2012 |
+| Readiness | Insurance or savings; knowing the emergency vet | Practical; rated low |
+
+### How the report is assembled
+
+Every insight whose gate is open is rendered for the dog. Moves are ranked by
+priority plus twenty times the years the 1.0 recommendation engine gives back
+(where the move corresponds to a priced lever — weight, dental, vet care,
+activity, diet, environment, smoke, fear), and the top six lead; the rest fall
+through to their topic panels. Flags, wins and vet questions are ranked by
+priority. A twelve-month calendar is built from the same facts. The sources
+list contains only what that report cited, in order of first use.
+
+Phrasing varies between dogs: each phrase slot is chosen by hashing the dog's
+identity (name, age to a tenth, breed, sex, origin) together with the slot's
+key, so the same dog always gets the same words, a different dog gets
+different ones, and changing one answer never reshuffles the rest. Tests
+check determinism, that hundreds of fuzzed dogs get hundreds of distinct
+openings, that every insight is reachable, that none contains a brand, a link
+or a grammar slip, and that a plain 1.0 profile produces exactly the 1.0
+result.
+
+### Sources for the 2.0 advice
+
+Full citations for all of these are in `src/core/v2/sources.ts` and are
+reproduced, with links where they could be verified, at the foot of every 2.0
+report. The ones not already in the list below:
+
+16. Yarborough S. et al. (2022). Evaluation of cognitive function in the Dog Aging Project. *Scientific Reports* 12:13316. https://doi.org/10.1038/s41598-022-15837-9
+17. McCoy B.M. et al. (2023). Social determinants of health and disease in companion dogs. *Evolution, Medicine, and Public Health* 11(1):187–201. https://doi.org/10.1093/emph/eoad011
+18. Bray E.E. et al. (2022). Once-daily feeding is associated with better health in companion dogs. *GeroScience* 44(3):1779–1790. https://doi.org/10.1007/s11357-022-00575-7
+19. Creevy K.E. et al. (2022). An open science study of ageing in companion dogs. *Nature* 602:51–57.
+20. Glickman L.T. et al. (2000). Non-dietary risk factors for gastric dilatation-volvulus in large and giant breed dogs. *JAVMA* 217(10):1492–1499.
+21. Pipan M. et al. (2012). An Internet-based survey of risk factors for surgical gastric dilatation-volvulus in dogs. *JAVMA* 241(12):1456–1462.
+22. Raghavan M. et al. (2004). Diet-related risk factors for gastric dilatation-volvulus in dogs of high-risk breeds. *JAAHA* 40(3):192–203.
+23. Stockman J. et al. (2013). Evaluation of recipes of home-prepared maintenance diets for dogs. *JAVMA* 242(11):1500–1505.
+24. U.S. FDA. Investigation into potential link between certain diets and canine dilated cardiomyopathy (2019; updated 2022). Freeman L.M. et al. (2018). Diet-associated dilated cardiomyopathy in dogs: what do we know? *JAVMA* 253(11):1390–1394.
+25. van Bree F.P.J. et al. (2018). Zoonotic bacteria and parasites found in raw meat-based diets for cats and dogs. *Veterinary Record* 182(2):50.
+26. Harvey C., Serfilippi L. & Barnvos D. (2015). Effect of frequency of brushing teeth on plaque and calculus accumulation, and gingivitis in dogs. *Journal of Veterinary Dentistry* 32(1):16–21.
+27. O'Neill D.G. et al. (2021). Epidemiology of periodontal disease in dogs in the UK primary-care veterinary setting. *JSAP* 62(12):1051–1061; and (2021) Frequency and predisposing factors for canine otitis externa in the UK. *Canine Medicine and Genetics* 8:7.
+28. Hall E.J., Carter A.J. & O'Neill D.G. (2020). Incidence and risk factors for heat-related illness (heatstroke) in UK dogs. *Scientific Reports* 10:9128; and (2020) Dogs don't die just in hot cars. *Animals* 10(8):1324.
+29. Boyd C. et al. (2018). Mortality resulting from undesirable behaviours in dogs aged under three years. *Animal Welfare* 27(3):251–262.
+30. Dreschel N.A. (2010). The effects of fear and anxiety on health and lifespan in pet dogs. *Applied Animal Behaviour Science* 125(3–4):157–162.
+31. Vieira de Castro A.C. et al. (2020). Does training method matter? *PLOS ONE* 15(12):e0225023.
+32. Levy M. et al. (2009). A preliminary retrospective survey of injuries occurring in dogs participating in canine agility. *VCOT* 22(4):321–324.
+33. Salvin H.E. et al. (2010). Under diagnosis of canine cognitive dysfunction. *The Veterinary Journal* 184(3):277–281.
+34. Milgram N.W. et al. (2005). Learning ability in aged beagle dogs is preserved by behavioral enrichment and dietary fortification. *Neurobiology of Aging* 26(1):77–90.
+35. Lord L.K. et al. (2009). Characterization of animals with microchips entering animal shelters. *JAVMA* 235(2):160–167.
+36. Glickman L.T. et al. (2004). Herbicide exposure and the risk of transitional cell carcinoma of the urinary bladder in Scottish Terriers. *JAVMA* 224(8):1290–1297.
+37. Takashima-Uebelhoer B.B. et al. (2012). Household chemical exposures and the risk of canine malignant lymphoma. *Environmental Research* 112:171–176.
+38. Reif J.S. et al. (1998). Cancer of the nasal cavity and paranasal sinuses and exposure to environmental tobacco smoke in pet dogs. *Am J Epidemiol* 147(5):488–492; and (1992) Passive smoking and canine lung cancer risk. *Am J Epidemiol* 135(3):234–239.
+39. Roush J.K. et al. (2010). Fish oil omega-3 fatty acids and weight bearing in dogs with osteoarthritis. *JAVMA* 236(1):67–73. Vandeweerd J.-M. et al. (2012). Systematic review of efficacy of nutraceuticals to alleviate clinical signs of osteoarthritis. *JVIM* 26(3):448–456.
+40. Marshall W.G. et al. (2010). The effect of weight loss on lameness in obese dogs with osteoarthritis. *Veterinary Research Communications* 34(3):241–253.
+41. Jacob F. et al. (2002). Clinical evaluation of dietary modification for treatment of spontaneous chronic renal failure in dogs. *JAVMA* 220(8):1163–1170.
+42. Kealy R.D. et al. (1997). Five-year longitudinal study on limited food consumption and development of osteoarthritis in coxofemoral joints of dogs. *JAVMA* 210(2):222–225.
+43. Guidelines: AAHA Canine Vaccination (2022, updated 2024 — leptospirosis core); AAHA Senior Care (2023); AAHA Weight Management (2014); WSAVA Global Nutrition; American Heartworm Society; AVSAB position statements; AVMA policy on raw diets; ACVIM consensus statements on mitral valve disease (2019) and seizure management (2016); AVDC and VOHC; WSU MDR1 testing; Cambridge BOAS research; Villalobos HHHHHMM scale; ASPCA Animal Poison Control; APOP 2022; NSF International 2011.
 
 ## References
 

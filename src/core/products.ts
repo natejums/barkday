@@ -96,6 +96,9 @@ const PRODUCTS: Readonly<Record<string, ProductSpec>> = {
   },
 }
 
+/** The catalogue, read-only, so Barkday 2.0 can reuse entries by id without redeclaring them. */
+export const PRODUCT_CATALOG: Readonly<Record<string, ProductSpec>> = PRODUCTS
+
 /** Display order — safety and comfort essentials first, nice-to-haves last. */
 const PRODUCT_ORDER: readonly string[] = [
   'harness',

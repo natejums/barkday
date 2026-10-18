@@ -1,8 +1,13 @@
 # Barkday
 
-An evidence-based dog age calculator. It works out what your dog's age actually means — using their size, breed, body condition and how they live — instead of multiplying by seven.
+**The world's best dog age calculator.** Evidence-based, and built around one idea: the point of knowing your dog's age is to help them live their best life.
 
-**[Try it →](https://natejums.github.io/barkday/)**
+It works out what your dog's age actually means — using their size, their breed, their body condition and how they live — instead of multiplying by seven. And it comes in two versions:
+
+- **Classic** gives you the number, the honest range around it, and the reasons. Five questions by default, more if you want them.
+- **[2.0 · In depth](https://natejums.github.io/barkday/#2.0)** asks forty, about where your dog came from, what and how they eat and drink, how they spend their days, who they live with and what you've noticed lately — and turns the answers into a proactive, research-backed, **printable** report that is specific to your dog. Same engine underneath; far more on top.
+
+**[Try it →](https://natejums.github.io/barkday/)** · **[Open 2.0 →](https://natejums.github.io/barkday/#2.0)**
 
 ![Barkday calculating the age of a nine-year-old Labrador](docs/screenshot-light.png)
 
@@ -36,6 +41,26 @@ It also means the model judges a breed by how long it actually lives rather than
 This is the part most calculators get wrong. Caloric restriction, body condition, diet quality and exercise are not four independent factors; they are four windows onto largely one causal pathway. "Attentive owner" sits behind dental care, vet visits and parasite compliance alike. Summing the published effects would let a well-cared-for dog claim six or seven bonus years that no study has ever observed.
 
 So the modifiers saturate. Positive and negative adjustments are pooled separately and passed through `tanh`, which stays near-linear for small totals and flattens as they grow. One good habit counts almost fully; the sixth counts for much less. The UI shows both figures — what the factors sum to on paper, and what was actually applied.
+
+## Barkday 2.0
+
+The classic calculator answers "how old is my dog, really?". 2.0 answers the question behind it: *what should I be doing about it?*
+
+**More criteria, more tailored.** On top of everything Classic asks, 2.0 asks how the dog came to you and how old they were (a shelter adult's history is a different starting point from a puppy you've known from birth), what they eat and how often, whether the food is grain-free or legume-heavy, how many treats, how they get their water, whether they eat from raised bowls, what their exercise actually looks like, how much mental work they get, how they sleep, how long they spend alone, whether there are other dogs or children at home, how fearful they are, how they're trained, their vaccine and parasite status, whether the microchip actually leads back to you, anything already diagnosed, anything you've noticed lately, the weight trend, how they get around, your climate, lawn chemicals, the car, supplements, and whether you'd be ready for a bad day.
+
+**One new number, and the rest is advice — on purpose.** Of all those new questions, exactly one moves the headline figure: marked fear or anxiety, for which there is a published (if weak) lifespan finding. Everything else changes what the report tells you to *do*, not the arithmetic. That is the honest position: the 1.0 engine already models every factor with a defensible published effect on lifespan, and bolting on invented numbers for the rest would be the opposite of what this project stands for. Each new question is documented in [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md) with what it changes and why.
+
+**A report, not a wall of text.** A library of around 185 research-backed insights — each gated on the answers, each citing a real source with its evidence strength shown — is assembled into: a short, warm opening note about *this* dog in *this* household; the top six proactive moves, ranked, with the years the lifespan model gives back where it can price them; what's going well; what to know right now (the emergencies, the real risks); a twelve-month calendar; the detail by topic; questions to bring to the next vet visit; brand-free gear; and the sources that particular report drew on. Phrasing varies deterministically from dog to dog, so no two reports read alike while the same dog always gets the same words. Like everything else here it is composed offline from the structured result — nothing is sent anywhere and nothing is written by a language model, so it is private, free, and cannot make a finding up.
+
+**Printable.** One button turns the report into a clean, single-column document; the browser's print dialog turns that into a PDF to keep or to take to the vet.
+
+**Rolling back to the baseline.** The calculator as it was before 2.0 is preserved intact: the `baseline` branch sits at commit `f1928a3`, and the Classic tab *is* that calculator, unchanged. To restore the whole repository to exactly that state:
+
+```bash
+git fetch origin baseline
+git checkout baseline          # look around; nothing changes on main
+git checkout main && git reset --hard origin/baseline   # or roll main back to it outright
+```
 
 ## What it models
 
@@ -79,6 +104,31 @@ result.breedHealth?.priorityNow   // the concerns to watch for at this dog's age
 result.productSuggestions         // generic, brand-free gear tied to the findings above
 
 composeDogReport(result).paragraphs // a warm, personal note about this dog, composed offline
+
+// Barkday 2.0: the same engine, with the in-depth profile on top.
+import { calculateDeep } from './src/core'
+
+const { base, report } = calculateDeep({
+  name: 'Rufus',
+  ageYears: 9,
+  breedName: 'Lab',
+  bodyConditionScore: 7,
+  origin: 'shelter-rescue',
+  joinedAt: 'adult',
+  foodType: 'dry',
+  grainFree: 'yes',
+  mealsPerDay: 'one',
+  waterSource: 'bowl-topped-up',
+  anxiety: 'some',
+})
+
+base.humanAge.years   // the 1.0 result, unchanged by the extra answers
+report.story          // the opening note, worded for this dog
+report.moves          // the ranked proactive moves, priced in years where the model can
+report.flags          // what to know now — the bloat signs, the diet-linked heart-disease signal
+report.calendar       // the next twelve months
+report.vetQuestions   // what to bring to the next visit
+report.sources        // only the studies this report drew on
 ```
 
 Recommendations are not a lookup table. Each one re-runs the whole lifespan model with that single change applied and reports the difference — so the years quoted already account for saturation and for overlap with everything else the dog has going on.
@@ -99,7 +149,7 @@ npm run typecheck
 npm run build
 ```
 
-The test suite covers the models against their published tables, dataset invariants across all 247 breeds, saturation behaviour, life-stage boundary monotonicity, neuter-timing behaviour, the condition catalogue's integrity and match rate, life-stage-aware health prioritisation, and a fuzz pass over every breed at five ages.
+The test suite covers the models against their published tables, dataset invariants across all 247 breeds, saturation behaviour, life-stage boundary monotonicity, neuter-timing behaviour, the condition catalogue's integrity and match rate, life-stage-aware health prioritisation, and a fuzz pass over every breed at five ages. For 2.0 it checks that every insight cites a real source, is reachable by some dog, and renders without a grammar slip, brand or link; that reports are deterministic yet distinct across hundreds of fuzzed dogs; and that a plain 1.0 profile produces exactly the 1.0 result.
 
 ## Where the numbers come from
 
@@ -113,6 +163,8 @@ Every constant is traceable, and [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md) li
 - **Glickman et al. (2011)** — periodontal disease and kidney disease, n = 164,706
 - **Hart et al. (2020)** — age of neutering and joint/cancer risk across 35 breeds, behind the timing-aware neuter factor
 - **Merck Veterinary Manual** and the veterinary specialty colleges (ACVS, ACVO, ACVIM) — the clinical reference behind the breed-health condition catalogue
+
+The 2.0 report draws on a further ~50 sources — the Dog Aging Project papers on activity, social environment and feeding frequency; the VetCompass studies of heat illness, behaviour-linked deaths, periodontal and ear disease; the bloat, raised-bowl, home-cooked-diet, raw-diet, lawn-chemical and secondhand-smoke studies; the AAHA, AHS, WSAVA, AVSAB and ACVIM guidelines — every one listed with a full citation in [`src/core/v2/sources.ts`](src/core/v2/sources.ts) and in the methodology. Where a DOI could be verified it is given; where it couldn't, the citation stands without a link rather than with a guessed one.
 
 **McMillan et al. (2024)** (n = 584,734) is cited throughout but no number is taken from it. It is the evidence for the two modifiers deliberately left out — skull shape and mixed ancestry — and it earns its place by ruling things out rather than by contributing a constant.
 

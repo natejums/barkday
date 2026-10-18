@@ -26,6 +26,12 @@ export type DietQuality = 'poor' | 'average' | 'good' | 'excellent'
 export type DentalCare = 'none' | 'occasional' | 'regular' | 'professional'
 export type VetCare = 'none' | 'reactive' | 'annual' | 'proactive'
 export type LivingEnvironment = 'indoor' | 'mixed' | 'outdoor'
+/**
+ * How fearful or anxious the dog is day to day. A Barkday 2.0 input. Only the
+ * top level moves the lifespan estimate, and only a little — see
+ * FEAR_LIFESPAN_PENALTY — but every level shapes the guidance.
+ */
+export type Anxiety = 'none' | 'some' | 'a-lot'
 
 /** How much weight to put on a given number. Surfaced in the UI, not hidden. */
 export type Confidence = 'high' | 'moderate' | 'low'
@@ -84,6 +90,13 @@ export interface DogProfile {
   vetCare?: VetCare
   environment?: LivingEnvironment
   secondhandSmoke?: boolean
+  /**
+   * Fear and anxiety. The single Barkday 2.0 question that reaches the number:
+   * marked fear costs a little expected lifespan, per the one study that asked
+   * (Dreschel 2010, owner-reported, retrospective — so low confidence). The
+   * rest of the 2.0 questionnaire changes the advice, not the arithmetic.
+   */
+  anxiety?: Anxiety
 }
 
 /** One way of answering "how old is that in human years?". */

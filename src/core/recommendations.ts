@@ -74,6 +74,13 @@ const IMPROVEMENTS: readonly Improvement[] = [
     apply: (p) => (p.environment === 'outdoor' ? { ...p, environment: 'indoor' } : null),
   },
   {
+    id: 'anxiety',
+    title: 'Take their fear seriously, and get help with it',
+    detail:
+      'Chronic fear is a welfare problem first and a health one second. A veterinary behaviourist or a certified reward-based trainer can genuinely change it — desensitisation and counter-conditioning work, and medication is a legitimate part of the toolkit rather than a last resort. Punishment-based methods make fearful dogs worse.',
+    apply: (p) => (p.anxiety === 'a-lot' ? { ...p, anxiety: 'some' } : null),
+  },
+  {
     id: 'smoke',
     title: 'Keep smoke out of the house',
     detail:

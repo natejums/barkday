@@ -237,6 +237,21 @@ export const UNDERWEIGHT_PENALTY_PER_POINT = 0.3
  * https://doi.org/10.1007/s11357-022-00653-w
  */
 
+/**
+ * Years of expected lifespan docked for a dog with marked, persistent fear.
+ *
+ * Dreschel (2010), Applied Animal Behaviour Science 125:157–162, surveyed the
+ * owners of 721 dogs that had died and found that dogs with extreme fear of
+ * strangers lived about six months less than calm dogs, while fearful and
+ * separation-anxious dogs had more skin disease. It is owner-reported and
+ * retrospective, which is why it ships as low confidence, and it fires only at
+ * the top level of the 2.0 fear question — "some" anxiety changes the guidance
+ * but not the number. The direction is plausible (chronic stress has a
+ * physiological cost) and, usefully, fear is one of the more treatable things
+ * on the whole form.
+ */
+export const FEAR_LIFESPAN_PENALTY = 0.5
+
 /** Montoya 2023: females 12.76 years, males 12.63. Small, consistent, real. */
 export const FEMALE_LIFESPAN_BONUS = 0.13
 

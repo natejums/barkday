@@ -10,6 +10,7 @@ import {
   BCS_PENALTY_PER_POINT,
   EARLY_NEUTER_LARGE_BREED_OFFSET,
   EARLY_NEUTER_MONTHS,
+  FEAR_LIFESPAN_PENALTY,
   FEMALE_LIFESPAN_BONUS,
   IDEAL_BCS_RANGE,
   MODIFIER_SATURATION_YEARS,
@@ -289,6 +290,21 @@ function collectFactors(profile: DogProfile, sizeClass: SizeClass) {
         `Dogs living primarily outdoors face more trauma, infectious disease, parasites and ` +
         `temperature extremes. Much of this gap is really about supervision rather than the ` +
         `outdoors itself.`,
+    })
+  }
+
+  if (profile.anxiety === 'a-lot') {
+    factors.push({
+      id: 'anxiety',
+      label: 'Marked fear or anxiety',
+      deltaYears: -FEAR_LIFESPAN_PENALTY,
+      confidence: 'low',
+      explanation:
+        `In the one study to ask the question directly — owner reports on 721 dogs that had ` +
+        `died — dogs with extreme fear of strangers lived about six months less than calm dogs, ` +
+        `and fearful or separation-anxious dogs had more skin disease. Retrospective and ` +
+        `owner-reported, so weak evidence; but chronic stress is not free, and fear is one of ` +
+        `the most treatable things on this form.`,
     })
   }
 
